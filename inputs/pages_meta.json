@@ -35,12 +35,6 @@
     "country_code": "CH"
   },
   {
-    "id": "unibe",
-    "name": "University of Bern",
-    "job_vacancies_link": "https://www.karriere.unibe.ch/jobs/job_portal/index_eng.html",
-    "country_code": "CH"
-  },
-  {
     "id": "unibas",
     "name": "University of Basel",
     "job_vacancies_link": "https://www.unibas.ch/en/Working-at-the-University-of-Basel/Current-Vacancies.html",
@@ -56,6 +50,12 @@
     "id": "unil",
     "name": "University of Lausanne",
     "job_vacancies_link": "https://www.unil.ch/carrieres/en/home/menuinst/emplois.html",
+    "country_code": "CH"
+  },
+  {
+    "id": "unibe",
+    "name": "University of Bern",
+    "job_vacancies_link": "https://www.karriere.unibe.ch/jobs/job_portal/index_eng.html",
     "country_code": "CH"
   },
   {

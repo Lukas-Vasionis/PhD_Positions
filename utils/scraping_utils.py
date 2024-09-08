@@ -8,11 +8,12 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 
-def get_page_through_selenium(page, ad_element):
+def get_page_through_selenium(page, ad_element, return_driver=False):
     """
 
     :param page: URL of the page to scrape
     :param ad_element: any name of element tag class or other string in plain text of scraped html. This string indicates that the desired element is loaded
+    :param return_driver: if TRUE - returns driver instead of page's source code
     :return: str: source code of the page
     """
     # Set up Chrome options
@@ -40,6 +41,10 @@ def get_page_through_selenium(page, ad_element):
             break
         time.sleep(1)  # Sleep for a short time before checking again
 
-    # Get the page content
-    page_content_local = driver.page_source
-    return page_content_local
+    # Return one of two: driver (if marked in the f-tion arguments), or else page source_code
+    if return_driver:
+        return driver
+    else:
+        # Get the page content
+        page_content_local = driver.page_source
+        return page_content_local

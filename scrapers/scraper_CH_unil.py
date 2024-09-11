@@ -1,13 +1,14 @@
 import traceback
 import pandas as pd
 from selenium.webdriver.support.wait import WebDriverWait
-from utils import scraping_utils as su
 
 import time
 from bs4 import BeautifulSoup
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+import utils.scraping_utils as su
+import os
 
 class ScrUniL:
     def __init__(self, driver):
@@ -190,4 +191,18 @@ scraper_unil.driver.quit()
 
 print("Structuring data")
 list_all_jobs.process_raw_lists()
-print(pd.DataFrame(list_all_jobs.list_all_jobs).to_string())
+jobs_structured=list_all_jobs.list_all_jobs
+
+def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):
+    # When executing from execute_scrapers files, the program cant find the path of database.
+    # This is caused by different db relevant paths between this script and execute_scrapers scrips
+    # Hence, this function.
+
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to the database
+    return os.path.join(script_dir, relative_path)
+
+tbl_name=os.path.basename(__file__).replace(".py","")
+su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=get_db_path())
+

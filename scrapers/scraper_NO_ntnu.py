@@ -1,15 +1,8 @@
-import time
-
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-from utils import scraping_utils as su
-
-
+from scrapers.utils import scraping_utils as su
+import utils.scraping_utils as su
+import os
 page_content = su.get_page_through_selenium("https://www.ntnu.edu/vacancies", ad_element="card-deck")
 
 # Parse the page content with BeautifulSoup
@@ -36,6 +29,19 @@ def job_to_structure(job):
         'deadline': deadline
     }
 
+
 jobs_structured=[job_to_structure(x) for x in jobs]
-df=pd.DataFrame(jobs_structured)
-print(df.to_string())
+
+def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):
+    # When executing from execute_scrapers files, the program cant find the path of database.
+    # This is caused by different db relevant paths between this script and execute_scrapers scrips
+    # Hence, this function.
+
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to the database
+    return os.path.join(script_dir, relative_path)
+
+tbl_name=os.path.basename(__file__).replace(".py","")
+su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=get_db_path())
+

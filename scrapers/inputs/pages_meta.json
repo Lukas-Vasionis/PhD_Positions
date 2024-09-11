@@ -24,6 +24,7 @@
     "country_code": "NO"
   },
   {
+    "id": "nmbu",
     "name": "Norwegian University of Life Sciences (NMBU)",
     "job_vacancies_link": "https://www.nmbu.no/en/about/vacancies",
     "country_code": "NO"
@@ -59,7 +60,7 @@
     "country_code": "CH"
   },
   {
-    "id": "",
+    "id": "uit",
     "name": "University of Tromsø - The Arctic University of Norway",
     "job_vacancies_link": "",
     "country_code": "NO"

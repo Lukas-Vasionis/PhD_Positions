@@ -1,9 +1,7 @@
 import bs4
-import requests
-from pprint import pprint
-from bs4 import BeautifulSoup
-import pandas as pd
-from utils import scraping_utils as su
+import utils.scraping_utils as su
+import os
+
 
 page = su.get_page_through_selenium("https://jobs.ethz.ch/","job-ad__wrapper")
 
@@ -44,6 +42,19 @@ def job_to_structure(job):
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]
-df=pd.DataFrame(jobs_structured)
-print(df.head().to_string())
+
+
+def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):
+    # When executing from execute_scrapers files, the program cant find the path of database.
+    # This is caused by different db relevant paths between this script and execute_scrapers scrips
+    # Hence, this function.
+
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the absolute path to the database
+    return os.path.join(script_dir, relative_path)
+
+tbl_name=os.path.basename(__file__).replace(".py","")
+su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=get_db_path())
+
 

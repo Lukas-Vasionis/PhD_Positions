@@ -1,3 +1,4 @@
+import os
 import time
 
 import pandas as pd
@@ -7,6 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import polars as pl
 
 def get_page_through_selenium(page, ad_element, return_driver=False):
     """
@@ -48,3 +50,13 @@ def get_page_through_selenium(page, ad_element, return_driver=False):
         # Get the page content
         page_content_local = driver.page_source
         return page_content_local
+
+
+
+def save_to_db_as_tbl(table_name, scraped_data, db_path):
+    df = pl.DataFrame(scraped_data)
+    df.write_database(
+        table_name,
+        connection = f"sqlite:///{db_path}",
+        if_table_exists = "replace"
+)

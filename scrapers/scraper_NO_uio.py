@@ -47,12 +47,12 @@ def structure_job_info(job_raw) -> dict:
         print(traceback.format_exc())
         exit()
     return {
-            'job_title': job_title,
-            'job_url': job_url,
             'department': department,
-            'faculty': faculty,
+            'job_title': job_title,
+            'deadline': " ".join(deadline.strip().split(", ")[-2:]),
             'language': language,
-            'deadline': deadline
+            'job_url': job_url,
+            'faculty': faculty,
         }
 
 def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):

@@ -22,10 +22,10 @@ def job_to_structure(job):
 
     # Structure the extracted data
     return {
-        'title': job_title,
-        'link': job_link,
         'department': department,
-        'deadline': deadline
+        'title': job_title,
+        'deadline': " ".join(deadline.strip().split(", ")[-2:]),
+        'link': job_link,
     }
 
 jobs_structured = [job_to_structure(x) for x in jobs]

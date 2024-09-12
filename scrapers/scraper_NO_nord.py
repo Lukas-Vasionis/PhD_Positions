@@ -19,10 +19,10 @@ def job_to_structure(job):
     category = job.find('div', class_='jobbnorge-category').get_text(strip=True)
 
     return {
-        'title': job_title,
-        'link': job_link,
         'department': department,
-        'deadline': deadline,
+        'title': job_title,
+        'deadline': " ".join(deadline.strip().split(", ")[-2:]),
+        'link': job_link,
         'category': category
     }
 

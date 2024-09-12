@@ -52,17 +52,18 @@ def job_to_structure(job):
 
     institute_info = job.find('div', {'id': 'institut'}).text.strip().split('\n')
     employment_info = institute_info[-1].strip()
-    institute_name = institute_info[-2].strip()
+    occupation_percent = institute_info[-2].strip()
     location = job.find_all('td')[1].text.strip()
     date_posted = job.find_all('td')[2].text.strip()
 
     return {
+        'institute':institute_info[0],
         'job_title': job_title,
-        'job_url': job_url,
-        'institute_name': institute_name,
+        'occupation_percent': occupation_percent,
         'employment_info': employment_info,
         'location': location,
-        'date_posted': date_posted
+        'date_posted': date_posted,
+        'job_url': job_url,
     }
 
 def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):

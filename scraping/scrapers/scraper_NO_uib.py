@@ -30,15 +30,6 @@ def job_to_structure(job):
 
 jobs_structured = [job_to_structure(x) for x in jobs]
 
-def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):
-    # When executing from execute_scrapers files, the program cant find the path of database.
-    # This is caused by different db relevant paths between this script and execute_scrapers scrips
-    # Hence, this function.
-
-    # Get the directory of the current script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Construct the absolute path to the database
-    return os.path.join(script_dir, relative_path)
 
 tbl_name=os.path.basename(__file__).replace(".py","")
-su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=get_db_path())
+su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

@@ -9,7 +9,7 @@ import json
 st.set_page_config(layout="wide")
 
 # Load the pages_meta.json file to create a mapper
-with open('scrapers/inputs/pages_meta.json') as f:
+with open('scraping/inputs/pages_meta.json') as f:
     pages_meta = json.load(f)
 
 # Create a mapping of table names to university names and country codes

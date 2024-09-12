@@ -24,7 +24,7 @@ jobs_structured=jobs_structured.drop(
 def convert_array_columns_to_string(df):
     """
     All scraped data is stored as tables with str type only. However, this scraper returns table where some columns are
-    array type. So, this f-tion converts them and aligns the table dtypes with tables of other scrapers.
+    array type. So, this f-tion converts them and aligns the table dtypes with tables of other scraping.
     Otherwise, the table fails to upload into db
 
     Convert array-like columns in a pandas DataFrame to string columns with comma-separated values.
@@ -57,6 +57,6 @@ def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):
     return os.path.join(script_dir, relative_path)
 
 tbl_name=os.path.basename(__file__).replace(".py","")
-su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=get_db_path())
+su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
 
 

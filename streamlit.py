@@ -1,4 +1,4 @@
-from pprint import pprint
+import traceback
 
 import streamlit as st
 import sqlite3
@@ -11,6 +11,7 @@ st.set_page_config(layout="wide")
 # Load the pages_meta.json file to create a mapper
 with open('scrapers/inputs/pages_meta.json') as f:
     pages_meta = json.load(f)
+
 # Create a mapping of table names to university names and country codes
 table_name_mapper = {
     f"processed_{entry['country_code']}_{entry['id']}": {
@@ -24,17 +25,15 @@ table_name_mapper = {
 db_path = "db/phd_jobs_in_schengen.db"
 conn = sqlite3.connect(db_path)
 
-
 # Function to fetch tables from the database
 @st.cache_data
 def get_tables(_conn):
     query = "SELECT name FROM sqlite_master WHERE type='table';"
     tables = pd.read_sql_query(query, _conn)
 
-    list_tables=[x for x in tables['name'].tolist() if x.startswith("processed_")]
+    list_tables = [x for x in tables['name'].tolist() if x.startswith("processed_")]
 
     return list_tables
-
 
 # Function to fetch columns of a table
 @st.cache_data
@@ -42,7 +41,6 @@ def get_columns(_conn, table_name):
     query = f"PRAGMA table_info({table_name});"
     columns = pd.read_sql_query(query, _conn)
     return columns['name'].tolist()
-
 
 # Function to fetch data from the selected table and columns
 @st.cache_data
@@ -52,8 +50,11 @@ def fetch_data(_conn, table_name, columns):
     query = f"SELECT {', '.join(quoted_columns)} FROM {table_name};"
     data = pd.read_sql_query(query, _conn)
 
+    # Format long strings and hyperlinks
+    for col in data.columns:
+        if data[col].dtype == object:  # Checks if the column type is a string
+            data[col] = data[col].apply(lambda x: f'<a href="{x}">{x}</a>' if isinstance(x, str) and x.startswith('http') else x)
     return data
-
 
 # Title of the Streamlit app
 st.title("SQLite Database Viewer")
@@ -92,7 +93,8 @@ if show_all_tables:
 
         if selected_columns:
             data = fetch_data(conn, table, selected_columns)
-            st.dataframe(data)
+            # Wrap the dataframe in HTML
+            st.markdown(data.to_html(escape=False, index=False), unsafe_allow_html=True)
 else:
     # Display selected table and columns
     if selected_table:
@@ -102,7 +104,8 @@ else:
 
         if selected_columns:
             data = fetch_data(conn, selected_table, selected_columns)
-            st.dataframe(data)
+            # Wrap the dataframe in HTML
+            st.markdown(data.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 # Close the connection to the database
 conn.close()

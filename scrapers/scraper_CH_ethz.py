@@ -33,12 +33,12 @@ def job_to_structure(job):
     # Structure the extracted data
     return {
         'title': job_title,
-        'link': job_link,
-        'work_time_percentage': work_time_percentage,
-        'city': city,
-        'contract_type': contract_type,
         'deadline': deadline,
-        'company': company
+        'contract_type': contract_type,
+        'work_time_percentage': work_time_percentage,
+        'link': job_link,
+        'city': city,
+        'company': company,
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]

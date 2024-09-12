@@ -48,7 +48,7 @@ def run_scripts_in_parallel(scripts):
                     print(f"Error from {script}:\n{stderr}")
 
             except Exception as e:
-                print(f"An error occurred in script {script_path}: error")
+                print(f"An error occurred in script {script_path}: {e}")
 
 
 # Run the scripts in parallel

@@ -20,11 +20,11 @@ def job_to_structure(job):
 
     return {
         'title': job_title,
-        'link': job_link,
         'description': job_description,
+        'deadline': deadline.replace(". ", " "),
+        'link': job_link,
         'location': location,
         'employment_type': employment_type,
-        'deadline': deadline
     }
 
 

@@ -116,7 +116,7 @@ class JobLists:
                     strip=True) if note_section and note_section.find('span', class_='jobContentEM') else 'N/A'
                 posted_date = note_section.find_all('span', class_='jobContentEM')[1].get_text(
                     strip=True) if note_section and len(note_section.find_all('span', class_='jobContentEM')) > 1 else 'N/A'
-
+                posted_date = posted_date.replace("Posted on ","")
                 type_of_position = \
                 note_section.find('span', {'aria-label': lambda x: x and 'Type of position' in x}).get('onclick').split('["')[
                     1].split('"]')[0] if note_section and note_section.find('span', {
@@ -140,15 +140,15 @@ class JobLists:
 
                 # Append the extracted data to the list
                 return {
-                    "Job Title": job_title,
-                    "Job Link": job_link,
-                    "Requisition ID": requisition_id,
-                    "Posted Date": posted_date,
-                    "Type of Position": type_of_position,
-                    "Area of Activity": area_of_activity,
-                    "Rate of Participation": rate_of_participation,
                     "Faculty / Service": faculty_service,
-                    "Personnel Category": personnel_category
+                    "Job Title": job_title,
+                    "Type of Position": type_of_position,
+                    "Rate of Participation": rate_of_participation,
+                    "Posted Date": posted_date,
+                    "Area of Activity": area_of_activity,
+                    "Job Link": job_link,
+                    "Personnel Category": personnel_category,
+                    "Requisition ID": requisition_id,
                 }
 
             except:
@@ -175,14 +175,15 @@ list_all_jobs=JobLists()
 
 # Expands the amount of job ads per page
 scraper_unil.expand_listing_to_50()
-
+time.sleep(0.5) # Need to wait for element to refresh. Otherwise, retruns initial list of len 10
 while True:
     # Scrape, add raw data into the list_all_jobs
     list_all_jobs.collect_raw_lists(scraper_unil.driver)
-
+    print(len(list_all_jobs.list_all_jobs))
 
     # Check if driver is on the last page. If yes - break
     if scraper_unil.is_driver_in_the_last_page():
+
         break
     else:
         scraper_unil.click_next_page()

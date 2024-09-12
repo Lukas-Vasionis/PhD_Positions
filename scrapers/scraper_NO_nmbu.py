@@ -20,11 +20,11 @@ def job_to_structure(job):
 
     # Structure the extracted data
     return {
+        'description': job_description,
+        'position': position.strip(),
+        'deadline': " ".join(deadline.strip().split(", ")[-2:]),
         'link': job_link,
         'published_date': published_date,
-        'position': position.strip(),
-        'deadline': deadline.strip(),
-        'description': job_description
     }
 
 def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):

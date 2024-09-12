@@ -55,15 +55,6 @@ def structure_job_info(job_raw) -> dict:
             'faculty': faculty,
         }
 
-def get_db_path(relative_path="../db/phd_jobs_in_schengen.db"):
-    # When executing from execute_scrapers files, the program cant find the path of database.
-    # This is caused by different db relevant paths between this script and execute_scrapers scrips
-    # Hence, this function.
-
-    # Get the directory of the current script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Construct the absolute path to the database
-    return os.path.join(script_dir, relative_path)
 
 pages=[
     'https://www.med.uio.no/english/about/vacancies/index.html',
@@ -91,7 +82,7 @@ try:
 
     print("Saving...")
     tbl_name=os.path.basename(__file__).replace(".py","")
-    su.save_to_db_as_tbl(scraped_data=all_structured_data, table_name=tbl_name, db_path=get_db_path())
+    su.save_to_db_as_tbl(scraped_data=all_structured_data, table_name=tbl_name, db_path=su.get_db_path())
 
 except Exception as e:
     print(e)

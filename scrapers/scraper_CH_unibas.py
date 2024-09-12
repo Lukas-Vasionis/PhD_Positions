@@ -26,7 +26,7 @@ class ScrUniBas:
     """
     def __init__(self, method: str):
         """
-        :param method: selects method of scraping: 'from_url' or 'from_driver
+        :param method: selects method of scrapers: 'from_url' or 'from_driver
         """
         self.method=method
         self.driver = None

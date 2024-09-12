@@ -1,13 +1,5 @@
-import os
-from inspect import trace
-from os import pread
-
 import bs4
 import requests
-from pprint import pprint
-from bs4 import BeautifulSoup
-import pandas as pd
-from soupsieve.pretty import pretty
 import utils.scraping_utils as su
 import os
 import traceback

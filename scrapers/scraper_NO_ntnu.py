@@ -1,6 +1,4 @@
-import pandas as pd
 from bs4 import BeautifulSoup
-from scrapers.utils import scraping_utils as su
 import utils.scraping_utils as su
 import os
 page_content = su.get_page_through_selenium("https://www.ntnu.edu/vacancies", ad_element="card-deck")

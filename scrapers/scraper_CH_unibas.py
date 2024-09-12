@@ -1,15 +1,9 @@
 # from telnetlib import EC
-from pprint import pprint
-from selenium.webdriver.chrome.webdriver import WebDriver as ChromeDriver
 import bs4
-import pandas as pd
 import requests
 from selenium.webdriver.support.wait import WebDriverWait
 import regex as re
-from scrapers.utils import scraping_utils as su
-
 from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
 from selenium.webdriver.support import expected_conditions as EC
 import utils.scraping_utils as su
 import os

@@ -1,5 +1,4 @@
 import traceback
-import pandas as pd
 from selenium.webdriver.support.wait import WebDriverWait
 
 import time

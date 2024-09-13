@@ -1,3 +1,5 @@
+import datetime
+
 from bs4 import BeautifulSoup
 import utils.scraping_utils as su
 import os
@@ -25,6 +27,7 @@ def job_to_structure(job):
         'link': job_link,
         'location': location,
         'employment_type': employment_type,
+        'scrape_date': datetime.date.today(),
     }
 
 

@@ -1,3 +1,4 @@
+import datetime
 import traceback
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -149,6 +150,7 @@ class JobLists:
                     "Job Link": job_link,
                     "Personnel Category": personnel_category,
                     "Requisition ID": requisition_id,
+                    "scrape_date":datetime.date.today(),
                 }
 
             except:

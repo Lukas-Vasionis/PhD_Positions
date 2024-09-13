@@ -1,3 +1,5 @@
+import datetime
+
 import bs4
 import requests
 import utils.scraping_utils as su
@@ -23,7 +25,8 @@ def job_to_structure(job):
         'title': job_title,
         'deadline': " ".join(deadline.strip().split(", ")[-2:]),
         'link': job_link,
-        'category': category
+        'category': category,
+        'scrape_date': datetime.date.today(),
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]

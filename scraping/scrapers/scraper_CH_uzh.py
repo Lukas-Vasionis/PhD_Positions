@@ -1,3 +1,4 @@
+import datetime
 from pprint import pprint
 
 import requests
@@ -19,6 +20,7 @@ jobs_structured=jobs_structured.drop(
      "szas.sza_location.zip","szas.sza_tasks","szas.sza_company_profil","szas.sza_requirements", "szas.sza_workplace.boundingBox",
      "szas.sza_workplace.placeId","id","viewkey"],
                      axis=1)
+jobs_structured['scrape_date'] = datetime.date.today()
 
 
 def convert_array_columns_to_string(df):

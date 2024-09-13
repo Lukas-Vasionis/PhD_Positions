@@ -86,6 +86,7 @@ show_all_tables = st.sidebar.checkbox("Show all tables", value=True)
 if show_all_tables:
     # Display all tables and columns
     for table in tables:
+
         display_name = f"{table_name_mapper.get(table, {}).get('university', table)} ({table_name_mapper.get(table, {}).get('country_code', 'Unknown')})"
         st.subheader(f"Table: {display_name}")
         columns = get_columns(conn, table)

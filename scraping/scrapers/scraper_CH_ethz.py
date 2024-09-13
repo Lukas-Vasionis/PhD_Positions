@@ -65,7 +65,7 @@ def job_to_structure(job):
         'title': job_title,
         'date_posted': date_posted,
         'work_time_percentage': work_time_percentage,
-        'link': job_link,
+        'url': job_link,
         'city': city,
         'contract_type': contract_type,
         'date_scraped': datetime.date.today()
@@ -74,7 +74,7 @@ def job_to_structure(job):
 jobs_structured=[job_to_structure(x) for x in jobs]
 
 
-tbl_name=os.path.basename(__file__).replace(".py","")
+tbl_name=os.path.basename(__file__)
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
 
 

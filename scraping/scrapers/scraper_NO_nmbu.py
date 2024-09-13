@@ -25,7 +25,7 @@ def job_to_structure(job):
         'description': job_description,
         'position': position.strip(),
         'deadline': " ".join(deadline.strip().split(", ")[-2:]),
-        'link': job_link,
+        'url': job_link,
         'published_date': published_date,
         'scrape_date': datetime.date.today(),
     }

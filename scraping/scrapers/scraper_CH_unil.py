@@ -147,7 +147,7 @@ class JobLists:
                     "Rate of Participation": rate_of_participation,
                     "Posted Date": posted_date,
                     "Area of Activity": area_of_activity,
-                    "Job Link": job_link,
+                    "url": job_link,
                     "Personnel Category": personnel_category,
                     "Requisition ID": requisition_id,
                     "scrape_date":datetime.date.today(),

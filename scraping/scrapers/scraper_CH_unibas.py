@@ -169,7 +169,7 @@ class ScrUniBas:
 
             res_dict = {
                 'title': job_title,
-                'link': job_link,
+                'url': job_link,
                 'date_posted': date_posted,
                 'date_scraped': datetime.date.today()
             }

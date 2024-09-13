@@ -24,7 +24,7 @@ def job_to_structure(job):
         'title': job_title,
         'description': job_description,
         'deadline': deadline.replace(". ", " "),
-        'link': job_link,
+        'url': job_link,
         'location': location,
         'employment_type': employment_type,
         'scrape_date': datetime.date.today(),

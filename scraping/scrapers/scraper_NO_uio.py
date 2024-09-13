@@ -53,7 +53,7 @@ def structure_job_info(job_raw) -> dict:
             'job_title': job_title,
             'deadline': " ".join(deadline.strip().split(", ")[-2:]),
             'language': language,
-            'job_url': job_url,
+            'url': job_url,
             'faculty': faculty,
             'scrape_date':datetime.date.today(),
         }

@@ -67,7 +67,7 @@ def job_to_structure(job):
         'employment_info': employment_info,
         'location': location,
         'date_posted': date_posted,
-        'job_url': job_url,
+        'url': job_url,
     }
 
 

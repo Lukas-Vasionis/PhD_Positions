@@ -8,6 +8,7 @@ class ScrData:
     def __init__(self, tbl_name):
         self.tbl_name=tbl_name
         self.df=None
+        self.df_labels=None
 
     def load_tbl_to_pd(self):
         """
@@ -56,12 +57,37 @@ class ScrData:
         self.df=self.df.sort_values(by=col_name, ascending=ascend)
         return self
 
-    def save_to_db(self):
-        df = pl.from_pandas(self.df) # Transforming into polars df only because uploading it into sql db is easier than pandas.
+    def create_labeling_tbl(self, col_urls):
+        df_labels=self.df
+        df_labels.loc[:,'labels']=''
+        df_labels=df_labels.loc[:,[col_urls, "labels"]]
+        self.df_labels = df_labels
 
-        processed_tbl_name=self.tbl_name.replace("scraper_","processed_")
-        df.write_database(
-            processed_tbl_name,
-            connection=f"sqlite:///phd_jobs_in_schengen.db",
+        return self
+
+    def save_to_db(self, tbl_type='processed'):
+        if tbl_type=='processed':
+            new_tbl_name=self.tbl_name.replace("scraper_","processed_")
+            df_to_upload = pl.from_pandas(self.df) # Transforming into polars df only because uploading it into sql db is easier than pandas.
+
+            # In the db, replace tbl if it exists
             if_table_exists="replace"
-        )
+
+        elif tbl_type=='labels':
+            new_tbl_name=self.tbl_name.replace("scraper_","labels_")
+            df_to_upload = pl.from_pandas(self.df_labels) # Transforming into polars df only because uploading it into sql db is easier than pandas.
+
+            # In the db, create tbl only if it doesn't exist
+            if_table_exists="fail"
+        else:
+            raise ValueError("The argument tbl_type accepts only 'processed','labels'")
+
+        try:
+            df_to_upload.write_database(
+                new_tbl_name,
+                connection=f"sqlite:///phd_jobs_in_schengen.db",
+                if_table_exists=if_table_exists
+            )
+        except Exception as e:
+            print(e)
+

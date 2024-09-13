@@ -1,3 +1,5 @@
+import datetime
+
 import bs4
 import requests
 from pprint import pprint
@@ -53,6 +55,7 @@ def structure_job_info(job_raw) -> dict:
             'language': language,
             'job_url': job_url,
             'faculty': faculty,
+            'scrape_date':datetime.date.today(),
         }
 
 

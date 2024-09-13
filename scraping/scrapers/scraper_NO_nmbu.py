@@ -1,3 +1,5 @@
+import datetime
+
 import bs4
 import utils.scraping_utils as su
 import os
@@ -25,6 +27,7 @@ def job_to_structure(job):
         'deadline': " ".join(deadline.strip().split(", ")[-2:]),
         'link': job_link,
         'published_date': published_date,
+        'scrape_date': datetime.date.today(),
     }
 
 

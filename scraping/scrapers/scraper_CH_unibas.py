@@ -1,4 +1,6 @@
 # from telnetlib import EC
+import datetime
+
 import bs4
 import requests
 from selenium.webdriver.support.wait import WebDriverWait
@@ -58,7 +60,8 @@ class ScrUniBas:
         def scrape_with_request() -> list:
 
             # Scrapes job list elements using url (filter_20=1083152 keeps only PhD ads)
-            r=requests.get("https://jobs.unibas.ch/?lang=en&offset=0&limit=9999&lang=en&query=&filter_20=1083152")
+            # r=requests.get("https://jobs.unibas.ch/?lang=en&offset=0&limit=9999&lang=en&query=&filter_20=1083152")
+            r=requests.get("https://jobs.unibas.ch/?lang=en&offset=0&limit=9999&lang=en&query=&filter_10=1082962&filter_10=1082964&filter_10=1082966&filter_10=1082968&filter_20=1083152")
             all_jobs_divs = scrape_job_list(r.content)
 
             return all_jobs_divs
@@ -132,7 +135,7 @@ class ScrUniBas:
             jobs_divs = [y for x in all_job_divs for y in x]
             return jobs_divs
 
-
+        print("Scraping...")
         if self.method=='from_url':
             all_job_divs=scrape_with_request()
         elif self.method=='from_driver':
@@ -167,7 +170,8 @@ class ScrUniBas:
             res_dict = {
                 'title': job_title,
                 'link': job_link,
-                'date_posted': date_posted
+                'date_posted': date_posted,
+                'date_scraped': datetime.date.today()
             }
             # Structure the extracted data
             return res_dict

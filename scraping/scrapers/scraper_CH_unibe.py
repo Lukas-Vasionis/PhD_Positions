@@ -1,11 +1,15 @@
+import datetime
+from pprint import pprint
+
 import bs4
+import pandas as pd
 import requests
 import utils.scraping_utils as su
 import os
 import traceback
 
 
-def show_all_jobs_in_one_page(page_soup, limit_jobs_viewed):
+def show_all_jobs_in_one_page(page_soup, limit_jobs_viewed, page_url):
     """
     Makes sure that the initial page shows all jobs in one page (to avoid pagination).
     First it scrapes element "counter" that tells how many jobs did the query return and stores value in total_jobs_found
@@ -27,7 +31,7 @@ def show_all_jobs_in_one_page(page_soup, limit_jobs_viewed):
     elif int(total_jobs_found) > limit_jobs_viewed:  # Not all jobs are in one page - adjust limit and reload
         limit_jobs_viewed = total_jobs_found
 
-        page_url=f"https://unibe.prospective.ch/?lang=en&offset=0&limit={LIMIT_JOBS_VIEWED}&lang=en&workload=90%2C100&query=&filter_10=1160350&filter_10=1160354&workload=90&workload=100"
+        page_url = page_url.replace("&limit=10&",f"&limit={str(limit_jobs_viewed)}&")
         page = requests.get(url=page_url)
         page_soup = bs4.BeautifulSoup(page.content, "html.parser")
 
@@ -73,7 +77,7 @@ By playing with page filters and checking payload, you can decipher the url enco
 """
 
 LIMIT_JOBS_VIEWED = 10
-page_url=f"https://unibe.prospective.ch/?lang=en&offset=0&limit={LIMIT_JOBS_VIEWED}&lang=en&workload=90%2C100&query=&filter_10=1160350&filter_10=1160354&workload=90&workload=100"
+page_url=f"https://unibe.prospective.ch/?lang=en&offset=0&limit={LIMIT_JOBS_VIEWED}&lang=en&workload=10%2C100&query=&filter_20=1160359&filter_20=1160361&filter_20=1160362&filter_10=1160350&filter_10=1160354&workload=10&workload=100"
 
 try:
     print("Retrieving the data...")
@@ -82,17 +86,20 @@ try:
         )
     print("Processing")
     soup = bs4.BeautifulSoup(page.content, "html.parser")
-    soup = show_all_jobs_in_one_page(page_soup=soup, limit_jobs_viewed=LIMIT_JOBS_VIEWED)
+    soup = show_all_jobs_in_one_page(page_soup=soup, limit_jobs_viewed=LIMIT_JOBS_VIEWED, page_url=page_url)
 
     jobs_raw = get_raw_list_of_jobs(soup)
     jobs_structured = [job_to_structure(x) for x in jobs_raw]
+
+    # Adding scrape date
+    scrape_date=datetime.date.today()
+    jobs_structured = [dict(item, scrape_date=scrape_date) for item in jobs_structured]
 
     print("Saving...")
     tbl_name=os.path.basename(__file__).replace(".py","")
     su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
 
-except Exception as e:
-    print(e)
+except Exception:
     print(traceback.format_exc())
 
 # print(df.to_string())

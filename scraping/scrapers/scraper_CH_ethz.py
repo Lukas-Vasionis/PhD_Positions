@@ -1,19 +1,48 @@
+import datetime
+import time
+
 import bs4
 import utils.scraping_utils as su
 import os
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+def select_phd_jobs(driver_page):
+    try:
+        print("Filtering PhD pages")
+        # Wait for the "Stellentyp" dropdown to be clickable and then click it
+        stellentyp_dropdown = WebDriverWait(driver_page, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//div[@class='select-selected' and text()='Stellentyp']"))
+        )
+        stellentyp_dropdown.click()
+
+        # Wait for the desired option to be visible and click it
+        doktorierende_option = WebDriverWait(driver_page, 10).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//div[@class='select-items']/div[text()='Doktorierende']"))
+        )
+        doktorierende_option.click()
+
+        return driver_page
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
-page = su.get_page_through_selenium("https://jobs.ethz.ch/","job-ad__wrapper")
+driver_pg = su.get_page_through_selenium("https://jobs.ethz.ch/","job-ad__wrapper", return_driver=True)
+driver_pg = select_phd_jobs(driver_page=driver_pg)
 
-soup = bs4.BeautifulSoup(page, "html.parser")
+soup = bs4.BeautifulSoup(driver_pg.page_source, "html.parser")
 
 jobs = soup.find_all("li","job-ad__item__wrapper")
 
 # contract types required to scrape job details more dynamicaly. Used only within function
 contract_types = ['fixed-term', 'permanent', 'Lehrstelle', 'unbefristet', 'befristet']
+
+
 def job_to_structure(job):
     link_element = job.find('a', class_='job-ad__item__link')
-    job_link = "https://www.ethz.ch" + link_element['href']  # Assume the link is relative; prepend the base URL
+    job_link = "https://jobs.ethz.ch" + link_element['href']  # Assume the link is relative; prepend the base URL
 
     job_title = job.find('div', class_='job-ad__item__title').get_text(strip=True)
     job_details = job.find('div', class_='job-ad__item__details').get_text(strip=True)
@@ -26,19 +55,20 @@ def job_to_structure(job):
     contract_type = next((part.strip() for part in details_parts if part.strip() in contract_types), None)
 
     # Split job_company_info to get deadline and department/company
-    deadline, company = job_company_info.split('|',1)
-    deadline = deadline.strip()
+    date_posted, company = job_company_info.split('|',1)
+    date_posted = date_posted.strip()
     company = company.strip()
 
     # Structure the extracted data
     return {
+        'company': company,
         'title': job_title,
-        'deadline': deadline,
-        'contract_type': contract_type,
+        'date_posted': date_posted,
         'work_time_percentage': work_time_percentage,
         'link': job_link,
         'city': city,
-        'company': company,
+        'contract_type': contract_type,
+        'date_scraped': datetime.date.today()
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]

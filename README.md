@@ -35,4 +35,6 @@ Run these commands in the console to perform these tasks
 - Filter data of Swiss Universities - keep only those that offer 90% or more occupancy.
 
 ## Application
-- Add filtering options
+- Add filtering for countries
+- Update scrapers to filter out non-biomedical, non-phd vacancies
+- Add option to upload/download of own labels for use in web app

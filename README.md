@@ -1,6 +1,7 @@
 ## In short... 
-The app scrapes primary sources of PhD vacancies and views them in the
-app where you can label the vacancies to follow which of them you already looked through.
+The app scrapes primary sources of PhD vacancies (university pages) and views them in the
+single app interface. Here you can label the vacancies to follow which of them you already looked through.
+The data is updated once a week.
 
 ## The data
 So far, the scrapers take only vacancies of PhDs in biomedical science. However, some 

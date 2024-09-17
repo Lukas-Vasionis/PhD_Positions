@@ -126,7 +126,7 @@ display_to_table_name = {
 
 # Sidebar for table selection with multiselect
 selected_display_names = st.sidebar.multiselect(
-    "Select tables to view",
+    "Select universities",
     table_display_names,
     default=st.session_state.selected_display_names
 )
@@ -157,7 +157,7 @@ st.session_state.label_filter_options = label_filter_options
 if selected_tables:
     for table in selected_tables:
         display_name = f"{table_name_mapper.get(table, {}).get('university', table)} ({table_name_mapper.get(table, {}).get('country_code', 'Unknown')})"
-        st.subheader(f"Table: {display_name}")
+        st.subheader(f"{display_name}")
         columns = get_columns(conn, table)
         selected_columns = st.multiselect(f"Select columns to display from {display_name}", columns, default=columns)
 

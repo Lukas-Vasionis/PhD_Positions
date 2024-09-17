@@ -1,4 +1,5 @@
 import datetime
+from pprint import pprint
 
 import bs4
 import utils.scraping_utils as su
@@ -22,25 +23,31 @@ def job_to_structure(job):
 
     # Structure the extracted data
     return {
-        'description': job_description,
+        'title': job_description,
         'position': position.strip(),
         'deadline': " ".join(deadline.strip().split(", ")[-2:]),
         'url': job_link,
         'published_date': published_date,
-        'scrape_date': datetime.date.today(),
+        'date_scraped': datetime.date.today(),
     }
 
 
+attempts=3
+while attempts!=0:
+    try:
+        page = su.get_page_through_selenium("https://www.nmbu.no/en/about/vacancies","wp-block-nmbu-job-opportunities")
+        soup = bs4.BeautifulSoup(page, "html.parser")
 
-try:
-    page = su.get_page_through_selenium("https://www.nmbu.no/en/about/vacancies","wp-block-nmbu-job-opportunities")
-    soup = bs4.BeautifulSoup(page, "html.parser")
+        jobs = soup.find_all("a","job-opportunity")
+        jobs_structured=[job_to_structure(x) for x in jobs]
 
-    jobs = soup.find_all("a","job-opportunity")
-    jobs_structured=[job_to_structure(x) for x in jobs]
+        tbl_name=os.path.basename(__file__).replace(".py","")
+        su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
 
-    tbl_name=os.path.basename(__file__).replace(".py","")
-    su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
+        break
 
-except Exception:
-    print(traceback.format_exc())
+    except Exception as e:
+        print("Trying again")
+        attempts=-1
+        if attempts == -1:
+            print(traceback.format_exc())

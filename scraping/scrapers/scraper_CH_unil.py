@@ -141,8 +141,8 @@ class JobLists:
 
                 # Append the extracted data to the list
                 return {
+                    "title": job_title,
                     "Faculty / Service": faculty_service,
-                    "Job Title": job_title,
                     "Type of Position": type_of_position,
                     "Rate of Participation": rate_of_participation,
                     "Posted Date": posted_date,
@@ -150,7 +150,7 @@ class JobLists:
                     "url": job_link,
                     "Personnel Category": personnel_category,
                     "Requisition ID": requisition_id,
-                    "scrape_date":datetime.date.today(),
+                    "date_scraped":datetime.date.today(),
                 }
 
             except:

@@ -21,12 +21,12 @@ def job_to_structure(job):
     category = job.find('div', class_='jobbnorge-category').get_text(strip=True)
 
     return {
-        'department': department,
         'title': job_title,
+        'department': department,
         'deadline': " ".join(deadline.strip().split(", ")[-2:]),
         'url': job_link,
         'category': category,
-        'scrape_date': datetime.date.today(),
+        'date_scraped': datetime.date.today(),
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]

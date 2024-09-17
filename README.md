@@ -43,4 +43,7 @@ Run these commands locally be executing these commands in the console:
 ## Application
 - Add filtering for countries
 - Update scrapers to filter out non-biomedical, non-phd vacancies
+- Create 2nd scraper to scrape deeper data from individual job offers
+- Create on button 'Save Labels' for all tables and place it to the side panel near the filters.
 - Add option to upload/download of own labels for use in web app
+- Add option to download labeled tables as one or multiple datasets

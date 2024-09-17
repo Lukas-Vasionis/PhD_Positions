@@ -26,8 +26,9 @@ OR
 
 Run these commands locally be executing these commands in the console:
 - Install the requirements with `pip install -r requirements.txt`
-- Run `./execute_scrapers.py` to gather the data. 
-- Run `streamlit run ./steamlit.py`
+- Run `./scraping/execute_scrapers.py` to gather the data.
+- Run `./db/process_db_tables.py` to process the data (parse dates, sort, join, etc.).
+- Run `streamlit run ./steamlit.py` to execute the app locally in your browser
 
 # To do
 ## Scraping

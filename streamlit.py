@@ -81,6 +81,33 @@ if 'label_filter_options' not in st.session_state:
 
 # Title of the Streamlit app
 st.title("PhD positions in Europe")
+st.markdown(
+    """
+    ---
+    
+    ### Welcome to Baltic Green's PhD finder! 
+
+    The app is designed to ease you PhD search by gathering data about open European PhD positions into one place. 
+    All data is scraped directly from the primary source - pages of the universities. The data is oriented to PhD job
+    positions in biomedical field. However, some universities post various vacancies in the single list. Therefore, 
+    don't be surprised to find positions in linguistics, theology or arts. This will be fixed in further updates of the scrapers.
+
+    ## Navigation
+    On the left you can select university by its name. In later updates, there will be additional filter of university's country.
+    Meanwhile, you will find country code at the end of each name.  
+
+    Upon selecting the university, a table will pop up. Here, you can assign labels to the selected position with a double click.
+    Upon selecting the cell in the table it is convenient to navigate through records with Arrow and Enter keys. 
+    After assigning labels to the job positions, don't forget to click Save Labels!
+
+    ## Saving labels
+    So far, this web application is designed to run locally as it saves-data-onto/displays-data-from the local database. 
+    Further updates will bring option to download/upload your own labels and use them in the web app. 
+    Meanwhile, **use this app locally. The web version is only for demo.**
+    
+    ---
+    """
+)
 
 # Get all tables from the database
 tables = get_tables(conn)

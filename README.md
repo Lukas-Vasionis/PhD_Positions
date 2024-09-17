@@ -13,7 +13,7 @@ Maybe it's a sign from the above for a career change? Who knows.  ¯\_(ツ)_/¯
 So I am looking for PhD in Norway and Switzerland and I have to constantly monitor multiple university pages for open positions which is painful.
 So, being a programmer I figured I could automate this monitoring by writing a few scrapers 
 and displaying gathered data in a single interface of a streamlit app. Now with few clicks I have the newest data in one place. 
-Moreover - I can mark which positions to ignore, and which are interesting.
+Moreover - I can mark which positions to ignore, and which are interesting. 
 
 
 The app is engineered with intend to upscale it. Over the time I will add scrapers for more universities. 

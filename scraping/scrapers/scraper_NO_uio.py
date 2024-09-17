@@ -49,13 +49,13 @@ def structure_job_info(job_raw) -> dict:
         print(traceback.format_exc())
         exit()
     return {
+            'title': job_title,
             'department': department,
-            'job_title': job_title,
             'deadline': " ".join(deadline.strip().split(", ")[-2:]),
             'language': language,
             'url': job_url,
             'faculty': faculty,
-            'scrape_date':datetime.date.today(),
+            'date_scraped':datetime.date.today(),
         }
 
 

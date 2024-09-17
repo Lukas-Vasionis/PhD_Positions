@@ -27,7 +27,7 @@ def job_to_structure(job):
         'url': job_link,
         'location': location,
         'employment_type': employment_type,
-        'scrape_date': datetime.date.today(),
+        'date_scraped': datetime.date.today(),
     }
 
 

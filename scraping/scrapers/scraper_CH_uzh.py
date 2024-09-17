@@ -40,7 +40,7 @@ jobs_structured=jobs_structured.drop(
      "szas.sza_location.zip","szas.sza_tasks","szas.sza_company_profil","szas.sza_requirements", "szas.sza_workplace.boundingBox",
      "szas.sza_workplace.placeId","id","viewkey"],
                      axis=1)
-jobs_structured['scrape_date'] = datetime.date.today()
+jobs_structured['date_scraped'] = datetime.date.today()
 jobs_structured.rename(columns={"links.directlink":"url"}, inplace=True) # unifying url links as they are key columns in label tables
 
 jobs_structured = convert_array_columns_to_string(jobs_structured)

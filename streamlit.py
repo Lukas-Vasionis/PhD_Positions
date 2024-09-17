@@ -1,12 +1,24 @@
-import traceback
-
 import streamlit as st
 import sqlite3
 import pandas as pd
 import json
+import polars as pl
+
+pl.Config(fmt_str_lengths=1000)
+pl.Config.set_tbl_width_chars(1000)
+pl.Config.set_tbl_rows(-1)
+pl.Config.set_tbl_cols(-1)
 
 # Set the layout to wide
 st.set_page_config(layout="wide")
+
+def print_tbl_labels(tbl):
+    df = pl.read_database_uri(
+        query=f"SELECT * FROM tbl_labels WHERE table_name='{tbl}'",
+        uri="sqlite://db/phd_jobs_in_schengen.db"
+    )
+    print(df.to_pandas().to_string())
+    return df
 
 # Load the pages_meta.json file to create a mapper
 with open('scraping/inputs/pages_meta.json') as f:
@@ -25,7 +37,18 @@ table_name_mapper = {
 db_path = "db/phd_jobs_in_schengen.db"
 conn = sqlite3.connect(db_path)
 
-# Function to fetch tables from the database
+# Read db
+def read_db(tbl):
+    try:
+        df = pl.read_database_uri(
+            query=f"SELECT * FROM {tbl}",
+            uri="sqlite://db/phd_jobs_in_schengen.db"
+        )
+        return df
+    except Exception as e:
+        print(e)
+
+# Function to fetch tables from the database (static data)
 @st.cache_data
 def get_tables(_conn):
     query = "SELECT name FROM sqlite_master WHERE type='table';"
@@ -35,26 +58,47 @@ def get_tables(_conn):
 
     return list_tables
 
-# Function to fetch columns of a table
+# Function to fetch columns of a table (static data)
 @st.cache_data
 def get_columns(_conn, table_name):
     query = f"PRAGMA table_info({table_name});"
     columns = pd.read_sql_query(query, _conn)
     return columns['name'].tolist()
 
-# Function to fetch data from the selected table and columns
-@st.cache_data
+# Function to fetch data from the selected table and columns (dynamic data, no cache)
 def fetch_data(_conn, table_name, columns):
     # Quote the column names properly to handle special characters
     quoted_columns = [f'"{col}"' for col in columns]
     query = f"SELECT {', '.join(quoted_columns)} FROM {table_name};"
     data = pd.read_sql_query(query, _conn)
 
-    # Format long strings and hyperlinks
-    for col in data.columns:
-        if data[col].dtype == object:  # Checks if the column type is a string
-            data[col] = data[col].apply(lambda x: f'<a href="{x}">{x}</a>' if isinstance(x, str) and x.startswith('http') else x)
+    # Fetch existing labels from tbl_labels
+    label_query = f"SELECT url, label FROM tbl_labels WHERE table_name='{table_name}';"
+    labels = pd.read_sql_query(label_query, _conn)
+
+    # Merge the labels with the main data
+    data = pd.merge(data, labels, how='left', left_on='url', right_on='url')
+
+    # Preserve any new changes by setting the default only for NaN values not set by the user
+    data['label'] = data['label'].fillna('None')  # Default value set to 'None' if no change was made by the user
+    data = data.loc[:, ['label'] + [c for c in data.columns if c != 'label']]
+
     return data
+
+# Updated function to save updated labels to the database
+def save_labels(_conn, table_name, labels_df):
+    _cursor = _conn.cursor()
+    update_query = """UPDATE tbl_labels SET label = ? WHERE url = ?"""
+
+    # Convert the DataFrame to a list of tuples (records) and update the database
+    rows_to_update=labels_df[['label', 'url']].to_records(index=False).tolist()
+
+    for row in rows_to_update:
+        _cursor.execute(update_query, row)
+        conn.commit()
+
+    # _conn.commit()
+    # print(rows_to_update)
 
 # Title of the Streamlit app
 st.title("SQLite Database Viewer")
@@ -74,19 +118,30 @@ display_to_table_name = {
     for table in tables
 }
 
-# Sidebar for table selection
-selected_display_name = st.sidebar.selectbox("Select a table to view", table_display_names)
+# Sidebar for table selection with multiselect
+selected_display_names = st.sidebar.multiselect(
+    "Select tables to view",
+    table_display_names,
+    default=[]
+)
 
-# Get the actual table name from the selected display name
-selected_table = display_to_table_name[selected_display_name]
+# Button to select all tables
+if st.sidebar.button('Show all tables'):
+    selected_display_names = table_display_names
 
-# Option to show all tables
-show_all_tables = st.sidebar.checkbox("Show all tables", value=True)
+# Button to clear table selection
+if st.sidebar.button('Clear table selection'):
+    selected_display_names = []
 
-if show_all_tables:
-    # Display all tables and columns
-    for table in tables:
+# Get the actual table names from the selected display names
+selected_tables = [display_to_table_name[display_name] for display_name in selected_display_names]
 
+# Filter widget for the label column
+label_filter_options = st.sidebar.multiselect("Filter by label", ["None", "Discard", "Interesting", "Applied"], default=["None", "Interesting", "Applied"])
+
+# Display selected tables and columns
+if selected_tables:
+    for table in selected_tables:
         display_name = f"{table_name_mapper.get(table, {}).get('university', table)} ({table_name_mapper.get(table, {}).get('country_code', 'Unknown')})"
         st.subheader(f"Table: {display_name}")
         columns = get_columns(conn, table)
@@ -94,19 +149,31 @@ if show_all_tables:
 
         if selected_columns:
             data = fetch_data(conn, table, selected_columns)
-            # Wrap the dataframe in HTML
-            st.markdown(data.to_html(escape=False, index=False), unsafe_allow_html=True)
-else:
-    # Display selected table and columns
-    if selected_table:
-        st.subheader(f"Table: {selected_display_name}")
-        columns = get_columns(conn, selected_table)
-        selected_columns = st.multiselect("Select columns to display", columns, default=columns)
 
-        if selected_columns:
-            data = fetch_data(conn, selected_table, selected_columns)
-            # Wrap the dataframe in HTML
-            st.markdown(data.to_html(escape=False, index=False), unsafe_allow_html=True)
+            # Apply the filter for selected labels
+            data = data[data['label'].isin(label_filter_options)]
+
+            # Display an editable data editor
+            edited_data = st.data_editor(data, column_config={"label": st.column_config.SelectboxColumn("label",
+                                                                                                        help="Assign value for future filtering",
+                                                                                                        width="medium",
+                                                                                                        options=["None","Discard","Interesting","Applied"],
+                                                                                                        required=True)
+                                                              },hide_index=True,
+                                         )
+
+            # Save labels when the user clicks the button
+            if st.button('Save Labels', key=f"save_{table}"):
+
+                print("Data for update")
+                print(edited_data[['url', 'label']].to_string())
+
+                save_labels(conn, table, edited_data[['url', 'label']].dropna())  # Drop any rows where label is NaN
+                print("DATA UPDATED")
+                print_tbl_labels("processed_CH_ethz")
+
+                st.cache_data.clear()  # Clear cache to refresh data
+                st.rerun()  # Rerun the script to avoid duplicate display
 
 # Close the connection to the database
 conn.close()

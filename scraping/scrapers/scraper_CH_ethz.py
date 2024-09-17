@@ -61,8 +61,8 @@ def job_to_structure(job):
 
     # Structure the extracted data
     return {
-        'company': company,
         'title': job_title,
+        'company': company,
         'date_posted': date_posted,
         'work_time_percentage': work_time_percentage,
         'url': job_link,

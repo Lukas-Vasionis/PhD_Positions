@@ -1,4 +1,9 @@
-[
+[{
+    "id": "ethz",
+    "name": "ETH Zurich - Swiss Federal Institute of Technology",
+    "job_vacancies_link": "https://jobs.ethz.ch/",
+    "country_code": "CH"
+  },
   {
     "id": "uio",
     "name": "University of Oslo",
@@ -28,12 +33,6 @@
     "name": "Norwegian University of Life Sciences (NMBU)",
     "job_vacancies_link": "https://www.nmbu.no/en/about/vacancies",
     "country_code": "NO"
-  },
-   {
-    "id": "ethz",
-    "name": "ETH Zurich - Swiss Federal Institute of Technology",
-    "job_vacancies_link": "https://jobs.ethz.ch/",
-    "country_code": "CH"
   },
   {
     "id": "unibas",

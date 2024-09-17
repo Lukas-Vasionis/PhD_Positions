@@ -61,13 +61,14 @@ def job_to_structure(job):
     date_posted = job.find_all('td')[2].text.strip()
 
     return {
+        'title': job_title,
         'institute':institute_info[0],
-        'job_title': job_title,
+        'url': job_url,
+        'date_posted': date_posted,
+        "date_scraped":datetime.date.today(),
         'occupation_percent': occupation_percent,
         'employment_info': employment_info,
         'location': location,
-        'date_posted': date_posted,
-        'url': job_url,
     }
 
 
@@ -93,7 +94,7 @@ try:
 
     # Adding scrape date
     scrape_date=datetime.date.today()
-    jobs_structured = [dict(item, scrape_date=scrape_date) for item in jobs_structured]
+    jobs_structured = [dict(item, date_scraped=scrape_date) for item in jobs_structured]
 
     print("Saving...")
     tbl_name=os.path.basename(__file__).replace(".py","")

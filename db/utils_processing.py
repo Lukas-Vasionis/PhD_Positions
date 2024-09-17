@@ -5,6 +5,8 @@ import traceback
 import pandas as pd
 import sqlalchemy
 import polars as pl
+from sqlalchemy import create_engine
+
 
 def get_list_of_tbls_in_db():
     list_tbl=pl.read_database_uri(
@@ -31,6 +33,43 @@ class ScrData:
         with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.db").connect() as connection:
             self.df=pd.read_sql(f"""SELECT * FROM {self.tbl_name}""",
                                 con=connection)
+        return self
+
+    def update_scraper_tbl(self):
+        """
+        Updates previously scraped PhD positions f"processed_{self.tbl_name}" with newly scraped PhD positions f"{self.tbl_name}"
+        :param tbl_name:
+        :return: pd.DataFrame
+        """
+
+        try:
+            # Find records (by url) that were already scraped.
+            # Remove them from new records
+            # Add new records to the old ones
+            with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.db").connect() as connection:
+                df_old_records=pd.read_sql(f"""SELECT * FROM processed_{self.tbl_name}""",
+                                    con=connection)
+                old_records=df_old_records['url'].to_list()
+
+                df_new_records = self.df
+                df_new_records=df_new_records.loc[~df_new_records['url'].isin(old_records),:]
+
+                df_updated_records=pd.concat([df_old_records, df_new_records]).reset_index(drop=True)
+
+                # # DEBUGING
+                # if 'CH_ethz' in self.tbl_name:
+                #     print("OLD RECORDS")
+                #     print(df_old_records.to_string())
+                #     print("NEW RECORDS")
+                #     print(df_new_records.to_string())
+                #     print("CONCATED")
+                #     print(df_updated_records.to_string())
+
+                self.df=df_updated_records
+
+        except pd.errors.DatabaseError:
+            print("No new records were found.")
+
         return self
 
     def filter_by_occupation_percent(self, percentage_column: str) -> pd.DataFrame:
@@ -70,8 +109,16 @@ class ScrData:
 
     def sort_by_column(self, col_name, ascend):
         """Sorts column by defined order"""
+
+        if 'date_scraped' not in self.df.columns:
+            try:
+                self.df=self.df.rename(columns={"scrape_date":"date_scraped"})
+            except:
+                print(f"date_scraped or scrape_date is not in self.df columns. These are: {self.df.columns}")
+                exit()
         self.df=self.df.sort_values(by=col_name, ascending=ascend)
         return self
+
 
     def create_or_update_tbl_labels(self):
         """
@@ -81,32 +128,54 @@ class ScrData:
         If exists: Appends scraped new records to it, removes duplicates
         """
         def get_label_tbl_of_old_records():
+
             cnx = sqlite3.connect('phd_jobs_in_schengen.db')
-            df_table_labels_old = pd.read_sql_query(f"""SELECT * FROM tbl_labels WHERE table_name = '{self}'""", cnx)
+            df_table_labels_old = pd.read_sql_query(f"""SELECT * FROM tbl_labels WHERE table_name = 'processed_{self.tbl_name}'""", cnx)
+
+            # DEBUGING
+            # if 'CH_ethz' in self.tbl_name:
+            #     print(self.tbl_name)
+            #     print("From get_label_tbl_of_old_records()")
+            #     print(df_table_labels_old.head().to_string())
+
             return df_table_labels_old
 
 
-        def get_label_tbl_of_new_records():
-            df_labels_new=self.df
-            df_labels_new.loc[:,'label']=''
-            df_labels_new.loc[:, 'table_name'] = f"processed_{self.tbl_name}"
-            df_labels_new=df_labels_new.loc[:,["table_name","url", "label"]]
-            return df_labels_new
+        def get_label_tbl_of_new_records() -> pd.DataFrame:
 
-        def update_tbl_labels_records(df_labels_old, df_labels_new):
+            df_lbl_new = self.df
+            df_lbl_new.loc[:,'label'] = None
+            df_lbl_new.loc[:, 'table_name'] = f"{self.tbl_name}"
 
-            # Concatenate the dataframes
-            df_labels = pd.concat([df_labels_old, df_labels_new])
+            df_lbl_new = df_lbl_new.loc[:,["table_name","url", "label"]]
+            return df_lbl_new
 
-            # Sort so that records with 'label' as None are last
-            df_labels = df_labels.sort_values(by=['table_name', 'url', 'label'], ascending=[True, True, False])
+        def update_tbl_labels_records(df_lbl_old: pd.DataFrame, df_lbl_new: pd.DataFrame) -> pd.DataFrame:
 
-            # Drop duplicates, keeping the first occurrence where 'label' is not None
-            df_labels = df_labels.drop_duplicates(subset=['table_name', 'url'], keep='first')
-            return df_labels
+            old_records = df_lbl_old['url'].tolist()
+
+            df_lbl_new = df_lbl_new.loc[~df_lbl_new['url'].isin(old_records), ["table_name","url", "label"]]
+            df_lbls = pd.concat([df_lbl_old, df_lbl_new]).reset_index(drop=True)
+
+            # Unifying prefixes for table_name
+            df_lbls.loc[:,['table_name']] = f"processed_{self.tbl_name}"
+
+            # # DEBUGING
+            # if 'CH_ethz' in self.tbl_name:
+            #     print("OLD RECORDS")
+            #     print(df_lbl_old.to_string())
+            #     print("List OLD RECORDS")
+            #     print(old_records)
+            #     print("NEW RECORDS")
+            #     print(df_lbl_new.to_string())
+            #     print("CONCATED")
+            #     print(df_lbls.to_string())
+            return df_lbls
 
         # Create labels table if it doesnt exist
+
         if 'tbl_labels' not in get_list_of_tbls_in_db():
+            print("Table 'tbl_labels' is not created. Creating...")
             conn = sqlite3.connect("phd_jobs_in_schengen.db")
             cursor = conn.cursor()
             cursor.execute(f"CREATE TABLE tbl_labels (table_name TEXT,url TEXT,label TEXT);")
@@ -117,15 +186,15 @@ class ScrData:
         df_labels_old = get_label_tbl_of_old_records()
         df_labels_new = get_label_tbl_of_new_records()
         df_labels = update_tbl_labels_records(df_labels_old, df_labels_new)
+        #
+        # df_labels = pl.from_pandas(df_labels)  # Transforming into polars df only because uploading it into sql db is easier than pandas.
+        # df_labels.write_database(
+        #     "tbl_labels",
+        #     connection=f"sqlite:///phd_jobs_in_schengen.db",
+        #     if_table_exists='replace'
+        # )
 
-        df_labels = pl.from_pandas(df_labels)  # Transforming into polars df only because uploading it into sql db is easier than pandas.
-        df_labels.write_database(
-            "tbl_labels",
-            connection=f"sqlite:///phd_jobs_in_schengen.db",
-            if_table_exists='replace'
-        )
-
-        self.df_labels = df_labels_new
+        self.df_labels = df_labels
         return self
 
     def save_to_db(self, df_to_upload=None, table_name=None, if_table_exists="replace"):
@@ -140,12 +209,17 @@ class ScrData:
         # df_to_upload = self.df_labels
 
         try:
-            df_to_upload = pl.from_pandas(df_to_upload) # Transforming into polars df only because uploading it into sql db is easier than pandas.
-            df_to_upload.write_database(
-                table_name,
-                connection=f"sqlite:///phd_jobs_in_schengen.db",
-                if_table_exists=if_table_exists
-            )
-        except Exception as e:
-            print(e)
+            engine = create_engine('sqlite:///phd_jobs_in_schengen.db')
+            # print(df_to_upload.to_string())
 
+            df_to_upload.to_sql(table_name, engine, if_exists='replace', index=False)
+
+            # df_to_upload = pl.from_pandas(df_to_upload) # Transforming into polars df only because uploading it into sql db is easier than pandas.
+            # df_to_upload.write_database(
+            #     table_name,
+            #     connection=f"sqlite:///phd_jobs_in_schengen.db",
+            #     if_table_exists=if_table_exists
+            # )
+        except Exception as e:
+            print(traceback.format_exc())
+            exit()

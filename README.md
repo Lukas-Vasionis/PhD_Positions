@@ -52,7 +52,7 @@ Run these commands locally be executing these commands in the console:
 - Add column for specific annotations
 
 # Further institutions to add
-Swiss bioinformatics institute: https://apply.refline.ch/499599/search.html
-University Hospitals
-Netherland Universities
-Swedish Universities
+- Swiss bioinformatics institute: https://apply.refline.ch/499599/search.html
+- University Hospitals
+- Netherland Universities
+- Swedish Universities

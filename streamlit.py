@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import json
 import polars as pl
+from io import BytesIO
 
 # Set the layout to wide
 st.set_page_config(layout="wide")
@@ -29,9 +30,7 @@ conn = sqlite3.connect(db_path)
 def get_tables(_conn):
     query = "SELECT name FROM sqlite_master WHERE type='table';"
     tables = pd.read_sql_query(query, _conn)
-
     list_tables = [x for x in tables['name'].tolist() if x.startswith("processed_")]
-
     return list_tables
 
 # Function to fetch columns of a table (static data)
@@ -43,7 +42,6 @@ def get_columns(_conn, table_name):
 
 # Function to fetch data from the selected table and columns (dynamic data, no cache)
 def fetch_data(_conn, table_name, columns):
-    # Quote the column names properly to handle special characters
     quoted_columns = [f'"{col}"' for col in columns]
     query = f"SELECT {', '.join(quoted_columns)} FROM {table_name};"
     data = pd.read_sql_query(query, _conn)
@@ -54,26 +52,33 @@ def fetch_data(_conn, table_name, columns):
 
     # Merge the labels with the main data
     data = pd.merge(data, labels, how='left', left_on='url', right_on='url')
-
-    # Preserve any new changes by setting the default only for NaN values not set by the user
-    data['label'] = data['label'].fillna('None')  # Default value set to 'None' if no change was made by the user
+    data['label'] = data['label'].fillna('None')  # Default value set to 'None'
     data = data.loc[:, ['label'] + [c for c in data.columns if c != 'label']]
-
     return data
 
-# Updated function to save updated labels to the database
+# Function to save updated labels to the database
 def save_labels(_conn, table_name, labels_df):
     _cursor = _conn.cursor()
     update_query = """UPDATE tbl_labels SET label = ? WHERE url = ?"""
-
-    # Convert the DataFrame to a list of tuples (records) and update the database
     rows_to_update = labels_df[['label', 'url']].to_records(index=False).tolist()
-
     for row in rows_to_update:
         _cursor.execute(update_query, row)
         conn.commit()
 
-# Initialize session state for filter and table selection
+# Function to download all filtered tables as an Excel file
+def download_filtered_tables(selected_tables, conn):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        for table in selected_tables:
+            columns = get_columns(conn, table)
+            data = fetch_data(conn, table, columns)
+            # Apply the label filter
+            filtered_data = data[data['label'].isin(st.session_state.label_filter_options)]
+            filtered_data.to_excel(writer, sheet_name=table, index=False)
+    output.seek(0)
+    return output
+
+# Initialize session state
 if 'selected_display_names' not in st.session_state:
     st.session_state.selected_display_names = []
 if 'label_filter_options' not in st.session_state:
@@ -84,27 +89,31 @@ st.title("PhD positions in Europe")
 st.markdown(
     """
     ---
-    
-    ### Welcome to Baltic Green's PhD finder! 
 
-    The app is designed to ease you PhD search by gathering data about open European PhD positions into one place. 
+    ### Welcome to Baltic Green's PhD finder!
+
+    The app is designed to ease you PhD search by gathering data about open European PhD positions into one place.
     All data is scraped directly from the primary source - pages of the universities. The data is oriented to PhD job
-    positions in biomedical field. However, some universities post various vacancies in the single list. Therefore, 
+    positions in biomedical field. However, some universities post various vacancies in the single list. Therefore,
     don't be surprised to find positions in linguistics, theology or arts. This will be fixed in further updates of the scrapers.
 
     ## Navigation
-    On the left you can select university by its name. In later updates, there will be additional filter of university's country.
+    - On the left you can select university by its name. In later updates, there will be additional filter of university's country.
     Meanwhile, you will find country code at the end of each name.  
 
-    Upon selecting the university, a table will pop up. Here, you can assign labels to the selected position with a double click.
-    Upon selecting the cell in the table it is convenient to navigate through records with Arrow and Enter keys. 
-    After assigning labels to the job positions, don't forget to click Save Labels!
+    - Upon selecting the university, a table will pop up. Here, you can assign labels to the selected position with a double click.
+    - Upon selecting the cell in the table it is convenient to navigate through records and label them with Arrow and Enter keys.
+
+    - **After assigning labels to the job positions, don't forget to click Save Labels!**
+
+    - If you label a record as 'discard' it will disappear upon clicking "Save Labels". **However, you can always get them back by adding 'Discard' to the label filters**
+
 
     ## Saving labels
-    So far, this web application is designed to run locally as it saves-data-onto/displays-data-from the local database. 
-    Further updates will bring option to download/upload your own labels and use them in the web app. 
+    So far, this web application is designed to run locally as it saves-data-onto/displays-data-from the local database.
+    Further updates will bring option to download/upload your own labels and use them in the web app.
     Meanwhile, **use this app locally. The web version is only for demo.**
-    
+
     ---
     """
 )
@@ -112,19 +121,19 @@ st.markdown(
 # Get all tables from the database
 tables = get_tables(conn)
 
-# Create a list of display names for selection in the format "University Name (Country Code)"
+# Create display names for selection
 table_display_names = [
     f"{table_name_mapper.get(table, {}).get('university', table)} ({table_name_mapper.get(table, {}).get('country_code', 'Unknown')})"
     for table in tables
 ]
 
-# Create a reverse lookup for selected display name to table name
+# Reverse lookup for selected display name to table name
 display_to_table_name = {
     f"{table_name_mapper.get(table, {}).get('university', table)} ({table_name_mapper.get(table, {}).get('country_code', 'Unknown')})": table
     for table in tables
 }
 
-# Sidebar for table selection with multiselect
+# Sidebar for table selection
 selected_display_names = st.sidebar.multiselect(
     "Select universities",
     table_display_names,
@@ -134,10 +143,12 @@ selected_display_names = st.sidebar.multiselect(
 # Button to select all tables
 if st.sidebar.button('Show all tables'):
     st.session_state.selected_display_names = table_display_names
+    selected_display_names = table_display_names  # Update the current selection
 
 # Button to clear table selection
 if st.sidebar.button('Clear table selection'):
     st.session_state.selected_display_names = []
+    selected_display_names = []  # Update the current selection
 
 # Get the actual table names from the selected display names
 selected_tables = [display_to_table_name[display_name] for display_name in selected_display_names]
@@ -152,6 +163,16 @@ label_filter_options = st.sidebar.multiselect(
 # Store selections in session state
 st.session_state.selected_display_names = selected_display_names
 st.session_state.label_filter_options = label_filter_options
+
+# Button to download all filtered tables as Excel
+if selected_tables and st.sidebar.button('Download filtered tables as Excel'):
+    excel_data = download_filtered_tables(selected_tables, conn)
+    st.download_button(
+        label="Download Excel file",
+        data=excel_data,
+        file_name="filtered_tables.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 # Display selected tables and columns
 if selected_tables:
@@ -178,9 +199,9 @@ if selected_tables:
 
             # Save labels when the user clicks the button
             if st.button('Save Labels', key=f"save_{table}"):
-                save_labels(conn, table, edited_data[['url', 'label']].dropna())  # Drop any rows where label is NaN
-                st.cache_data.clear()  # Clear cache to refresh data
-                st.rerun()  # Rerun the script to avoid duplicate display
+                save_labels(conn, table, edited_data[['url', 'label']].dropna())
+                st.cache_data.clear()
+                st.rerun()
 
 # Close the connection to the database
 conn.close()

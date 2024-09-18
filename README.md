@@ -39,8 +39,20 @@ Run these commands locally be executing these commands in the console:
 - Unify columns of tables. Those columns that don't match - display as other info in pop ups or other containers.
 - ETH Zurich - Swiss Federal Institute of Technology (CH) - add 'jobs.' to the beginning of job url. 
 - Filter data of Swiss Universities - keep only those that offer 90% or more occupancy.
-
+- Reorder columns - put essentials first: "title", "url", "deadline" ... other columns
+- Move scraping and processing to Github actions
 ## Application
 - Add filtering for countries
 - Update scrapers to filter out non-biomedical, non-phd vacancies
+- Create 2nd scraper to scrape deeper data from individual job offers
+- Create on button 'Save Labels' for all tables and place it to the side panel near the filters.
 - Add option to upload/download of own labels for use in web app
+- Add option to download labeled tables as one or multiple datasets
+- Add option to update deadline column (or the whole record)
+- Add column for specific annotations
+
+# Further institutions to add
+Swiss bioinformatics institute: https://apply.refline.ch/499599/search.html
+University Hospitals
+Netherland Universities
+Swedish Universities

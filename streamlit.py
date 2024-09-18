@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 import json
 import polars as pl
+from io import BytesIO
 
 # Set the layout to wide
 st.set_page_config(layout="wide")
@@ -64,6 +65,19 @@ def save_labels(_conn, table_name, labels_df):
         _cursor.execute(update_query, row)
         conn.commit()
 
+# Function to download all filtered tables as an Excel file
+def download_filtered_tables(selected_tables, conn):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        for table in selected_tables:
+            columns = get_columns(conn, table)
+            data = fetch_data(conn, table, columns)
+            # Apply the label filter
+            filtered_data = data[data['label'].isin(st.session_state.label_filter_options)]
+            filtered_data.to_excel(writer, sheet_name=table, index=False)
+    output.seek(0)
+    return output
+
 # Initialize session state
 if 'selected_display_names' not in st.session_state:
     st.session_state.selected_display_names = []
@@ -77,24 +91,24 @@ st.markdown(
     ---
 
     ### Welcome to Baltic Green's PhD finder!
-    
+
     The app is designed to ease you PhD search by gathering data about open European PhD positions into one place.
     All data is scraped directly from the primary source - pages of the universities. The data is oriented to PhD job
     positions in biomedical field. However, some universities post various vacancies in the single list. Therefore,
     don't be surprised to find positions in linguistics, theology or arts. This will be fixed in further updates of the scrapers.
-    
+
     ## Navigation
     - On the left you can select university by its name. In later updates, there will be additional filter of university's country.
     Meanwhile, you will find country code at the end of each name.  
-    
+
     - Upon selecting the university, a table will pop up. Here, you can assign labels to the selected position with a double click.
     - Upon selecting the cell in the table it is convenient to navigate through records and label them with Arrow and Enter keys.
-    
+
     - **After assigning labels to the job positions, don't forget to click Save Labels!**
-    
+
     - If you label a record as 'discard' it will disappear upon clicking "Save Labels". **However, you can always get them back by adding 'Discard' to the label filters**
-   
-    
+
+
     ## Saving labels
     So far, this web application is designed to run locally as it saves-data-onto/displays-data-from the local database.
     Further updates will bring option to download/upload your own labels and use them in the web app.
@@ -103,6 +117,7 @@ st.markdown(
     ---
     """
 )
+
 # Get all tables from the database
 tables = get_tables(conn)
 
@@ -148,6 +163,16 @@ label_filter_options = st.sidebar.multiselect(
 # Store selections in session state
 st.session_state.selected_display_names = selected_display_names
 st.session_state.label_filter_options = label_filter_options
+
+# Button to download all filtered tables as Excel
+if selected_tables and st.sidebar.button('Download filtered tables as Excel'):
+    excel_data = download_filtered_tables(selected_tables, conn)
+    st.download_button(
+        label="Download Excel file",
+        data=excel_data,
+        file_name="filtered_tables.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 # Display selected tables and columns
 if selected_tables:

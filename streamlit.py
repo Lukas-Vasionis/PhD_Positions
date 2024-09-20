@@ -169,15 +169,16 @@ label_filter_options = st.sidebar.multiselect(
 st.session_state.selected_display_names = selected_display_names
 st.session_state.label_filter_options = label_filter_options
 
-# Button to download all filtered tables as Excel
-if selected_tables and st.sidebar.button('Download filtered tables as Excel'):
-    excel_data = download_filtered_tables(selected_tables, conn)
-    st.download_button(
-        label="Download Excel file",
-        data=excel_data,
-        file_name="filtered_tables.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+# Button to download all filtered tables as Excel (only once in the sidebar)
+if selected_tables:
+    if st.sidebar.button('Download filtered tables as Excel'):
+        excel_data = download_filtered_tables(selected_tables, conn)
+        st.sidebar.download_button(
+            label="Download Excel file",
+            data=excel_data,
+            file_name="filtered_tables.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 # Display selected tables and columns
 if selected_tables:

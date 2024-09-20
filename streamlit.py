@@ -53,7 +53,12 @@ def fetch_data(_conn, table_name, columns):
     # Merge the labels with the main data
     data = pd.merge(data, labels, how='left', left_on='url', right_on='url')
     data['label'] = data['label'].fillna('None')  # Default value set to 'None'
-    data = data.loc[:, ['label'] + [c for c in data.columns if c != 'label']]
+
+    # Reorder columns
+    first_cols=['label', 'title', 'url']
+    other_cols=[c for c in data.columns if c not in first_cols]
+    data = data.loc[:, first_cols + other_cols]
+
     return data
 
 # Function to save updated labels to the database

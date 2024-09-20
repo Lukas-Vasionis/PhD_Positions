@@ -12,6 +12,7 @@ st.set_page_config(layout="wide")
 with open('scraping/inputs/pages_meta.json') as f:
     pages_meta = json.load(f)
 
+
 # Create a mapping of table names to university names and country codes
 table_name_mapper = {
     f"processed_{entry['country_code']}_{entry['id']}": {

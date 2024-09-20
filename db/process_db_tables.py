@@ -47,7 +47,10 @@ CH_uzh.create_or_update_tbl_labels()
 
 NO_nmbu = up.ScrData(tbl_name="NO_nmbu").load_tbl_to_pd()
 NO_nmbu.parse_date_columns(list_date_cols=["deadline"], date_format='%B %d %Y').sort_by_column(col_name="deadline", ascend=False)
+
 NO_nmbu.update_scraper_tbl().save_to_db()
+print(NO_nmbu.df)
+exit()
 NO_nmbu.create_or_update_tbl_labels()
 
 

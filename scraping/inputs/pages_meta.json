@@ -2,13 +2,15 @@
     "id": "ethz",
     "name": "ETH Zurich - Swiss Federal Institute of Technology",
     "job_vacancies_link": "https://jobs.ethz.ch/",
-    "country_code": "CH"
+    "country_code": "CH",
+    "country_name": "Switzerland"
   },
   {
     "id": "uio",
     "name": "University of Oslo",
     "job_vacancies_link": "https://www.uio.no/english/about/vacancies/academic/",
-    "country_code": "NO"
+    "country_code": "NO",
+    "country_name": "Norway"
   },
   {
     "id": "nord",

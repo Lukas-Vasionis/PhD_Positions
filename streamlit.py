@@ -13,6 +13,7 @@ with open('scraping/inputs/pages_meta.json') as f:
     pages_meta = json.load(f)
 
 
+
 # Create a mapping of table names to university names and country codes
 table_name_mapper = {
     f"processed_{entry['country_code']}_{entry['id']}": {
@@ -42,9 +43,12 @@ def get_columns(_conn, table_name):
     return columns['name'].tolist()
 
 # Function to fetch data from the selected table and columns (dynamic data, no cache)
-def fetch_data(_conn, table_name, columns):
-    quoted_columns = [f'"{col}"' for col in columns]
-    query = f"SELECT {', '.join(quoted_columns)} FROM {table_name};"
+def fetch_data(_conn, table_name,
+               # columns
+               ):
+    # quoted_columns = [f'"{col}"' for col in columns]
+    # query = f"SELECT {', '.join(quoted_columns)} FROM {table_name};"
+    query = f"SELECT * FROM {table_name};"
     data = pd.read_sql_query(query, _conn)
 
     # Fetch existing labels from tbl_labels
@@ -143,6 +147,7 @@ display_to_table_name = {
 selected_display_names = st.sidebar.multiselect(
     "Select universities",
     table_display_names,
+    key=f'select-uni',
     default=st.session_state.selected_display_names
 )
 
@@ -163,6 +168,7 @@ selected_tables = [display_to_table_name[display_name] for display_name in selec
 label_filter_options = st.sidebar.multiselect(
     "Filter by label",
     ["None", "Discard", "Interesting", "Applied"],
+    key='select-labels',
     default=st.session_state.label_filter_options
 )
 
@@ -181,38 +187,41 @@ if selected_tables:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
+
 # Display selected tables and columns
 if selected_tables:
     for table in selected_tables:
         display_name = f"{table_name_mapper.get(table, {}).get('university', table)} ({table_name_mapper.get(table, {}).get('country_code', 'Unknown')})"
         st.subheader(f"{display_name}")
         columns = get_columns(conn, table)
-        selected_columns = st.multiselect(f"Select columns to display from {display_name}", columns, default=columns)
+        # selected_columns = st.multiselect(f"Select columns to display from {display_name}", columns,key=f'select-cols-{table}', default=columns)
 
-        if selected_columns:
-            data = fetch_data(conn, table, selected_columns)
+        # if selected_columns:
+        data = fetch_data(conn, table)
 
-            # Apply the filter for selected labels
-            data = data[data['label'].isin(st.session_state.label_filter_options)]
+        # Apply the filter for selected labels
+        data = data[data['label'].isin(st.session_state.label_filter_options)]
 
-            # Display an editable data editor
-            edited_data = st.data_editor(data,
-                                         column_config={
-                                             "label": st.column_config.SelectboxColumn(
-                                                 "label",
-                                                 help="Assign value for future filtering",
-                                                 width="medium",
-                                                 options=["None", "Discard", "Interesting", "Applied"],
-                                                 required=True
-                                             ),
-                                             "url":st.column_config.LinkColumn("url")
-                                         }, hide_index=True)
+        # Display an editable data editor
+        edited_data = st.data_editor(data,
+                                     column_config={
+                                         "label": st.column_config.SelectboxColumn(
+                                             "label",
+                                             help="Assign value for future filtering",
+                                             width="medium",
+                                             options=["None", "Discard", "Interesting", "Applied"],
+                                             required=True
+                                         ),
+                                         "url":st.column_config.LinkColumn("url")
+                                     },
+                                     key=f'data_editor-{table}',
+                                     hide_index=True)
 
-            # Save labels when the user clicks the button
-            if st.button('Save Labels', key=f"save_{table}"):
-                save_labels(conn, table, edited_data[['url', 'label']].dropna())
-                st.cache_data.clear()
-                st.rerun()
+        # Save labels when the user clicks the button
+        if st.button('Save Labels', key=f"save_{table}"):
+            save_labels(conn, table, edited_data[['url', 'label']].dropna())
+            st.cache_data.clear()
+            st.rerun()
 
 # Close the connection to the database
 conn.close()

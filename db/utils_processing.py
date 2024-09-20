@@ -49,21 +49,13 @@ class ScrData:
             with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.db").connect() as connection:
                 df_old_records=pd.read_sql(f"""SELECT * FROM processed_{self.tbl_name}""",
                                     con=connection)
-                old_records=df_old_records['url'].to_list()
+                old_records=df_old_records['url'].unique().tolist()
 
                 df_new_records = self.df
-                df_new_records=df_new_records.loc[~df_new_records['url'].isin(old_records),:]
+                df_new_records = df_new_records.loc[~df_new_records['url'].isin(old_records),:]
 
                 df_updated_records=pd.concat([df_old_records, df_new_records]).reset_index(drop=True)
-
-                # # DEBUGING
-                # if 'CH_ethz' in self.tbl_name:
-                #     print("OLD RECORDS")
-                #     print(df_old_records.to_string())
-                #     print("NEW RECORDS")
-                #     print(df_new_records.to_string())
-                #     print("CONCATED")
-                #     print(df_updated_records.to_string())
+                df_updated_records = df_updated_records.drop_duplicates(subset=[x for x in df_updated_records.columns if x!="date_scraped"])
 
                 self.df=df_updated_records
 
@@ -210,7 +202,7 @@ class ScrData:
 
         try:
             engine = create_engine('sqlite:///phd_jobs_in_schengen.db')
-            # print(df_to_upload.to_string())
+
 
             df_to_upload.to_sql(table_name, engine, if_exists='replace', index=False)
 

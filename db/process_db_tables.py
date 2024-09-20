@@ -74,9 +74,8 @@ NO_uio.create_or_update_tbl_labels()
 scr_data_objects = [obj for obj in globals().values() if isinstance(obj, up.ScrData)]
 
 df_all_label_tbls = pd.concat([obj.df_labels for obj in scr_data_objects])
-
+df_all_label_tbls = df_all_label_tbls.drop_duplicates()
 all_label_tbls=up.ScrData(tbl_name='labels_tbl', df=df_all_label_tbls)
-print(all_label_tbls.df.to_string())
 all_label_tbls.save_to_db(table_name='tbl_labels')
 
 

@@ -189,13 +189,17 @@ if selected_tables:
             data = data[data['label'].isin(st.session_state.label_filter_options)]
 
             # Display an editable data editor
-            edited_data = st.data_editor(data, column_config={"label": st.column_config.SelectboxColumn(
-                "label",
-                help="Assign value for future filtering",
-                width="medium",
-                options=["None", "Discard", "Interesting", "Applied"],
-                required=True
-            )}, hide_index=True)
+            edited_data = st.data_editor(data,
+                                         column_config={
+                                             "label": st.column_config.SelectboxColumn(
+                                                 "label",
+                                                 help="Assign value for future filtering",
+                                                 width="medium",
+                                                 options=["None", "Discard", "Interesting", "Applied"],
+                                                 required=True
+                                             ),
+                                             "url":st.column_config.LinkColumn("url")
+                                         }, hide_index=True)
 
             # Save labels when the user clicks the button
             if st.button('Save Labels', key=f"save_{table}"):

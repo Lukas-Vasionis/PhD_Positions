@@ -47,10 +47,7 @@ CH_uzh.create_or_update_tbl_labels()
 
 NO_nmbu = up.ScrData(tbl_name="NO_nmbu").load_tbl_to_pd()
 NO_nmbu.parse_date_columns(list_date_cols=["deadline"], date_format='%B %d %Y').sort_by_column(col_name="deadline", ascend=False)
-
 NO_nmbu.update_scraper_tbl().save_to_db()
-print(NO_nmbu.df)
-exit()
 NO_nmbu.create_or_update_tbl_labels()
 
 
@@ -77,9 +74,8 @@ NO_uio.create_or_update_tbl_labels()
 scr_data_objects = [obj for obj in globals().values() if isinstance(obj, up.ScrData)]
 
 df_all_label_tbls = pd.concat([obj.df_labels for obj in scr_data_objects])
-
+df_all_label_tbls = df_all_label_tbls.drop_duplicates()
 all_label_tbls=up.ScrData(tbl_name='labels_tbl', df=df_all_label_tbls)
-print(all_label_tbls.df.to_string())
 all_label_tbls.save_to_db(table_name='tbl_labels')
 
 

@@ -12,6 +12,7 @@ st.set_page_config(layout="wide")
 with open('scraping/inputs/pages_meta.json') as f:
     pages_meta = json.load(f)
 
+
 # Create a mapping of table names to university names and country codes
 table_name_mapper = {
     f"processed_{entry['country_code']}_{entry['id']}": {
@@ -53,7 +54,12 @@ def fetch_data(_conn, table_name, columns):
     # Merge the labels with the main data
     data = pd.merge(data, labels, how='left', left_on='url', right_on='url')
     data['label'] = data['label'].fillna('None')  # Default value set to 'None'
-    data = data.loc[:, ['label'] + [c for c in data.columns if c != 'label']]
+
+    # Reorder columns
+    first_cols=['label', 'title', 'url']
+    other_cols=[c for c in data.columns if c not in first_cols]
+    data = data.loc[:, first_cols + other_cols]
+
     return data
 
 # Function to save updated labels to the database
@@ -164,15 +170,16 @@ label_filter_options = st.sidebar.multiselect(
 st.session_state.selected_display_names = selected_display_names
 st.session_state.label_filter_options = label_filter_options
 
-# Button to download all filtered tables as Excel
-if selected_tables and st.sidebar.button('Download filtered tables as Excel'):
-    excel_data = download_filtered_tables(selected_tables, conn)
-    st.download_button(
-        label="Download Excel file",
-        data=excel_data,
-        file_name="filtered_tables.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+# Button to download all filtered tables as Excel (only once in the sidebar)
+if selected_tables:
+    if st.sidebar.button('Download filtered tables as Excel'):
+        excel_data = download_filtered_tables(selected_tables, conn)
+        st.sidebar.download_button(
+            label="Download Excel file",
+            data=excel_data,
+            file_name="filtered_tables.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 # Display selected tables and columns
 if selected_tables:

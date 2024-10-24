@@ -74,5 +74,12 @@
     "job_vacancies_link": "",
     "country_code": "NO",
     "country_name": "Norway"
+  },
+  {
+    "id": "tum",
+    "name": "Technical University of Munich",
+    "job_vacancies_link": "",
+    "country_code": "DE",
+    "country_name": "Germany"
   }
 ]

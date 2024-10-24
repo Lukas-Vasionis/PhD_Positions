@@ -72,6 +72,17 @@ def job_to_structure(job):
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]
+if not jobs_structured:
+    jobs_structured = [{
+        'title': "",
+        'company': "",
+        'date_posted': "",
+        'work_time_percentage': "",
+        'url': "",
+        'city': "",
+        'contract_type': "",
+        'date_scraped': ""
+    }]
 
 
 tbl_name=os.path.basename(__file__)

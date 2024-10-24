@@ -77,7 +77,7 @@ try:
 
         jobs_raw = get_raw_list_of_jobs(soup)
         if (jobs_raw is None) or type(jobs_raw)==str:
-            print(f"Failed to scrape, check the page {page_url}")
+            print(f"No data? Failed to scrape, check the page {page_url}")
             continue
 
         jobs_structured = [structure_job_info(x) for x in jobs_raw]

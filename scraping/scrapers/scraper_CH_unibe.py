@@ -96,6 +96,18 @@ try:
     scrape_date=datetime.date.today()
     jobs_structured = [dict(item, date_scraped=scrape_date) for item in jobs_structured]
 
+    if not jobs_structured:
+        jobs_structured =  [{
+            'title': "",
+            'institute':"",
+            'url': "",
+            'date_posted': "",
+            "date_scraped":"",
+            'occupation_percent': "",
+            'employment_info': "",
+            'location': "",
+        }]
+
     print("Saving...")
     tbl_name=os.path.basename(__file__).replace(".py","")
     su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

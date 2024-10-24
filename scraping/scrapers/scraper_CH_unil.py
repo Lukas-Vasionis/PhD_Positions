@@ -177,7 +177,7 @@ list_all_jobs=JobLists()
 
 # Expands the amount of job ads per page
 scraper_unil.expand_listing_to_50()
-time.sleep(0.5) # Need to wait for element to refresh. Otherwise, retruns initial list of len 10
+time.sleep(1) # Need to wait for element to refresh. Otherwise, retruns initial list of len 10
 while True:
     # Scrape, add raw data into the list_all_jobs
     list_all_jobs.collect_raw_lists(scraper_unil.driver)
@@ -194,6 +194,19 @@ scraper_unil.driver.quit()
 print("Structuring data")
 list_all_jobs.process_raw_lists()
 jobs_structured=list_all_jobs.list_all_jobs
+if not jobs_structured:
+    jobs_structured={
+                        "title": "",
+                        "Faculty / Service": "",
+                        "Type of Position": "",
+                        "Rate of Participation": "",
+                        "Posted Date": "",
+                        "Area of Activity": "",
+                        "url": "",
+                        "Personnel Category": "",
+                        "Requisition ID": "",
+                        "date_scraped":"",
+                    }
 
 tbl_name=os.path.basename(__file__).replace(".py","")
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

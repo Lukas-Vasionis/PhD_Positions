@@ -66,6 +66,8 @@ def fetch_data(_conn, table_name,
 
     return data
 
+label_options=["None", "Discard", "Interesting", "Applied", 'Rejected']
+
 # Function to save updated labels to the database
 def save_labels(_conn, table_name, labels_df):
     _cursor = _conn.cursor()
@@ -167,7 +169,7 @@ selected_tables = [display_to_table_name[display_name] for display_name in selec
 # Filter widget for the label column
 label_filter_options = st.sidebar.multiselect(
     "Filter by label",
-    ["None", "Discard", "Interesting", "Applied"],
+    label_options,
     key='select-labels',
     default=st.session_state.label_filter_options
 )
@@ -209,7 +211,7 @@ if selected_tables:
                                              "label",
                                              help="Assign value for future filtering",
                                              width="medium",
-                                             options=["None", "Discard", "Interesting", "Applied"],
+                                             options=label_options,
                                              required=True
                                          ),
                                          "url":st.column_config.LinkColumn("url")

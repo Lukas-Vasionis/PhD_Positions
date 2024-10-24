@@ -32,7 +32,16 @@ def job_to_structure(job):
 
 
 jobs_structured=[job_to_structure(x) for x in jobs]
-
+if not jobs_structured:
+    jobs_structured={
+        'title': "",
+        'description': "",
+        'deadline': "",
+        'url': "",
+        'location': "",
+        'employment_type': "",
+        'date_scraped': "",
+    }
 
 
 tbl_name=os.path.basename(__file__).replace(".py","")

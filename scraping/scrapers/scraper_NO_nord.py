@@ -30,8 +30,15 @@ def job_to_structure(job):
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]
-
-
+if not jobs_structured:
+    jobs_structured = [{
+        'title': '',
+        'department': '',
+        'deadline': "",
+        'url': "",
+        'category': "",
+        'date_scraped': "",
+    }]
 
 tbl_name=os.path.basename(__file__).replace(".py","")
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

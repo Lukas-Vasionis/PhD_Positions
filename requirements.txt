@@ -58,7 +58,7 @@ SQLAlchemy==2.0.34
 streamlit==1.38.0
 tenacity==8.5.0
 toml==0.10.2
-tornado==6.4.1
+tornado==6.4.2
 tqdm==4.66.5
 triad==0.9.8
 trio==0.26.2

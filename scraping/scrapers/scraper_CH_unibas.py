@@ -185,6 +185,8 @@ class ScrUniBas:
 scr_unibas=ScrUniBas(method="from_url").iterate_and_collect().structure_all_jobs()
 jobs_structured=scr_unibas.jobs_structured
 
+print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
+
 tbl_name=os.path.basename(__file__).replace(".py","")
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
 

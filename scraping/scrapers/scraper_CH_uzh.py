@@ -46,6 +46,8 @@ jobs_structured.rename(columns={"links.directlink":"url"}, inplace=True) # unify
 jobs_structured = convert_array_columns_to_string(jobs_structured)
 jobs_structured = jobs_structured.to_dict(orient='records') # Not the most elegant solution, but this f-tion deals nicely with nested jsons
 
+print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
+
 tbl_name=os.path.basename(__file__).replace(".py","")
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
 

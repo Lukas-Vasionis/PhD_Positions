@@ -118,7 +118,7 @@ class ScrData:
                 print(error)
                 print(self.df[date_col].unique())
                 print("END ERROR MESSAGE\n")
-            return self
+        return self
 
     def parse_date_columns_scandinavian(self, list_date_cols:list, date_format='%d.%m.%Y'):
 

@@ -16,11 +16,14 @@ def get_raw_list_of_jobs(page_soup) -> list:
         raw_elements=page_soup_jobs.find_all("div", class_="vrtx-list-item-content")
 
     else: # If no, check if page writes no vacancies
-        if page_soup.find("p", class_="vrtx-empty-message").text=='No vacancies.':
-            print("No vacancies.")
-            raw_elements='No vacancies.'
-        else: # Else could mean the elements has been renamed. Check the page
-            raw_elements= ""
+        try:
+            if page_soup.find("p", class_="vrtx-empty-message").text=='No vacancies.':
+                print("No vacancies.")
+                raw_elements='No vacancies.'
+            else: # Else could mean the elements has been renamed. Check the page
+                raw_elements= ""
+        except Exception as E:
+            print(f"\t{E}")
     return raw_elements
 
 def structure_job_info(job_raw) -> dict:
@@ -34,8 +37,13 @@ def structure_job_info(job_raw) -> dict:
         # Use safer element finding with defaults to avoid NoneType errors
         department_element = description_element.find('div', class_='department').find(
             'span') if description_element else None
-        faculty_element = description_element.find('div', class_='topDepartmentName').find(
-            'span') if description_element else None
+
+        try:
+            faculty_element = description_element.find('div', class_='topDepartmentName').find(
+            'span')
+        except:
+            faculty_element=""
+
         language_element = description_element.find('div', class_='language').find('span') if description_element else None
         deadline_element = description_element.find('div', class_='deadline').find('span') if description_element else None
 
@@ -81,6 +89,8 @@ try:
             continue
 
         jobs_structured = [structure_job_info(x) for x in jobs_raw]
+        print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
+
         all_structured_data += jobs_structured
 
     print("Saving...")

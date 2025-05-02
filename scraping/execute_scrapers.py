@@ -31,9 +31,11 @@ def execute_script(script_path):
             print(f"\tError from {script_path} (Attempt {attempt}):\n\t{stderr.replace('\n', '\n\t')}")
             if "OperationalError" in stderr or attempt < attempts:
                 print(f"Retrying {script_path} (Attempt {attempt + 1}/{attempts})...")
+                return None
             else:
                 # Maximum attempts reached, return the error
                 return script_path, stdout, stderr
+    return None
 
 
 def run_scripts(scripts):

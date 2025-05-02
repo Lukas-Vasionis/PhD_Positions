@@ -1,7 +1,15 @@
 import pandas as pd
-import sqlalchemy
 import utils_processing as up
 
+
+LX_unilu = up.ScrData(tbl_name="LX_unilu").load_tbl_to_pd()
+LX_unilu.update_scraper_tbl().save_to_db()
+LX_unilu.create_or_update_tbl_labels()
+
+DE_dkfz = up.ScrData(tbl_name="DE_dkfz").load_tbl_to_pd()
+DE_dkfz.parse_date_columns(list_date_cols=["deadline",], list_date_formats=["%Y-%m-%dT%H:%M:%S.%fZ"]).sort_by_column(col_name=["deadline"], ascend=False)
+DE_dkfz.update_scraper_tbl().save_to_db()
+DE_dkfz.create_or_update_tbl_labels()
 
 DE_tum = up.ScrData(tbl_name="DE_tum").load_tbl_to_pd()
 DE_tum.parse_date_columns(list_date_cols=["pubDate","date_scraped"], list_date_formats=["%a, %d %b %Y %H:%M:%S %z",'%B %d %Y']).sort_by_column(col_name=["date_scraped"], ascend=False)
@@ -43,7 +51,6 @@ NO_nmbu.parse_date_columns_scandinavian(list_date_cols=["deadline"], date_format
 NO_nmbu.update_scraper_tbl().save_to_db()
 NO_nmbu.create_or_update_tbl_labels()
 
-
 NO_nord = up.ScrData(tbl_name="NO_nord").load_tbl_to_pd()
 NO_nord.parse_date_columns_scandinavian(list_date_cols=["deadline"], date_format='%B %d %Y').sort_by_column(col_name=["date_scraped", "deadline"], ascend=False)
 NO_nord.update_scraper_tbl().save_to_db()
@@ -65,6 +72,7 @@ NO_uio.update_scraper_tbl().save_to_db()
 NO_uio.create_or_update_tbl_labels()
 
 scr_data_objects = [obj for obj in globals().values() if isinstance(obj, up.ScrData)]
+# print(scr_data_objects[0].df)
 
 df_all_label_tbls = pd.concat([obj.df_labels for obj in scr_data_objects])
 df_all_label_tbls = df_all_label_tbls.drop_duplicates()

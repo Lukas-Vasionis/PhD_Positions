@@ -64,6 +64,14 @@ def fetch_data(_conn, table_name,
     other_cols=[c for c in data.columns if c not in first_cols]
     data = data.loc[:, first_cols + other_cols]
 
+    # sorting
+    def select_sort_column(data):
+        if "deadline" in data.columns:
+            return "deadline"
+        else:
+            return "date_scraped"
+    data = data.sort_values(by=select_sort_column(data), ascending=False)
+
     return data
 
 label_options=["None", "Discard", "Interesting", "Applied", 'Rejected']
@@ -145,13 +153,16 @@ display_to_table_name = {
     for table in tables
 }
 
+
 # Sidebar for table selection
 selected_display_names = st.sidebar.multiselect(
     "Select universities",
     table_display_names,
     key=f'select-uni',
-    default=st.session_state.selected_display_names
+    # default=st.session_state.selected_display_names
 )
+
+
 
 # Button to select all tables
 if st.sidebar.button('Show all tables'):

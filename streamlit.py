@@ -4,13 +4,15 @@ import pandas as pd
 import json
 import polars as pl
 from io import BytesIO
+from src.phdfinder.config import pages_meta
 
 # Set the layout to wide
 st.set_page_config(layout="wide")
 
-# Load the pages_meta.json file to create a mapper
-with open('scraping/inputs/pages_meta.json') as f:
-    pages_meta = json.load(f)
+# Load the config.py file to create a mapper
+
+# with open('src/phdfinder/config.py') as f:
+#     pages_meta = json.load(f)
 
 
 
@@ -24,7 +26,7 @@ table_name_mapper = {
 }
 
 # Connect to the SQLite database
-db_path = "db/phd_jobs_in_schengen.db"
+db_path = "src/phdfinder/db/phd_jobs_in_schengen.db"
 conn = sqlite3.connect(db_path)
 
 # Function to fetch tables from the database (static data)

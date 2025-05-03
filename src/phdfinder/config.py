@@ -1,4 +1,4 @@
-[{
+pages_meta=[{
     "id": "ethz",
     "name": "ETH Zurich - Swiss Federal Institute of Technology",
     "job_vacancies_link": "https://jobs.ethz.ch/",

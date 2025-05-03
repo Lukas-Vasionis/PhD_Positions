@@ -26,7 +26,18 @@ You may go to the deployed app: https://phd-positions.streamlit.app/
 OR
 
 Run these commands locally be executing these commands in the console:
-- Install the requirements with `pip install -r requirements.txt`
+- Move to the root dir of this project
+- Install the requirements
+  - For devs:
+    ```
+    pip install poetry              # one-time
+    poetry install                  # sets up both prod & dev deps
+    ```
+  - For end users:
+    ```
+    poetry install --no-dev
+    ```
+
 - Run `./scraping/execute_scrapers.py` to gather the data.
 - Run `./db/process_db_tables.py` to process the data (parse dates, sort, join, etc.).
 - Run `streamlit run ./steamlit.py` to execute the app locally in your browser

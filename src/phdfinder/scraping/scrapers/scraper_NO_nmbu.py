@@ -1,10 +1,10 @@
 import datetime
+import os
+import traceback
 from pprint import pprint
 
 import bs4
 import utils.scraping_utils as su
-import os
-import traceback
 
 
 def job_to_structure(job):
@@ -40,6 +40,17 @@ while attempts!=0:
 
         jobs = soup.find_all("a","job-opportunity")
         jobs_structured=[job_to_structure(x) for x in jobs]
+        if not jobs_structured:
+            jobs_structured=[{
+                'title': "",
+                'position': "",
+                'deadline': "",
+                'url': "",
+                'published_date': "",
+                'date_scraped': "",
+            }]
+
+        print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
 
         tbl_name=os.path.basename(__file__).replace(".py","")
         su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())
@@ -48,6 +59,7 @@ while attempts!=0:
 
     except Exception as e:
         print("Trying again")
+        pprint(jobs)
         attempts=-1
         if attempts == -1:
             print(traceback.format_exc())

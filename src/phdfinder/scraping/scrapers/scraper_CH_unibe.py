@@ -1,12 +1,9 @@
 import datetime
-from pprint import pprint
-
-import bs4
-import pandas as pd
-import requests
-import utils.scraping_utils as su
 import os
 import traceback
+import bs4
+import requests
+import utils.scraping_utils as su
 
 
 def show_all_jobs_in_one_page(page_soup, limit_jobs_viewed, page_url):
@@ -96,6 +93,18 @@ try:
     scrape_date=datetime.date.today()
     jobs_structured = [dict(item, date_scraped=scrape_date) for item in jobs_structured]
 
+    if not jobs_structured:
+        jobs_structured =  [{
+            'title':"",
+            'institute':"",
+            'url':"",
+            'date_posted':"",
+            "date_scraped":"",
+            'occupation_percent':"",
+            'employment_info':"",
+            'location':"",
+        }]
+    print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
     print("Saving...")
     tbl_name=os.path.basename(__file__).replace(".py","")
     su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

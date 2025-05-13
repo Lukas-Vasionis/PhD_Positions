@@ -2,14 +2,12 @@ import inspect
 import os
 import time
 
-import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
 import polars as pl
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
 
 def get_page_through_selenium(page, ad_element, return_driver=False):
     """
@@ -63,10 +61,21 @@ def get_db_path(relative_path="../../db/phd_jobs_in_schengen.db"):
 
 def save_to_db_as_tbl(table_name, scraped_data, db_path):
 
-    df = pl.DataFrame(scraped_data)
-    df.write_database(
-        table_name.replace(".py","").replace("scraper_",""),
-        connection = f"sqlite:///{db_path}",
-        if_table_exists = "replace")
+    if isinstance(scraped_data, list):
+
+        # Asser if list scraped_data is not empty
+        if not scraped_data:
+            print("No data scraped. No vacancies?")
+            scraped_data=[{'title': "", 'url': "", 'deadline': ""}]
+
+        df = pl.DataFrame(scraped_data)
+        df.write_database(
+            table_name.replace(".py","").replace("scraper_",""),
+            connection = f"sqlite:///{db_path}",
+            if_table_exists = "replace")
+    else:
+        print("The scraped data is not a list. The argument 'scraped_data' looks like this:")
+        print(f"\tType: {type(scraped_data)}")
+        print(f"\tContent: {scraped_data}")
 
 

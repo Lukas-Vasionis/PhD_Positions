@@ -1,11 +1,11 @@
 import sqlite3
-import time
 import traceback
 
 import pandas as pd
-import sqlalchemy
 import polars as pl
-from sqlalchemy import create_engine
+import regex as re
+import sqlalchemy
+from sqlalchemy import create_engine, text
 
 
 def get_list_of_tbls_in_db():
@@ -47,14 +47,22 @@ class ScrData:
             # Remove them from new records
             # Add new records to the old ones
             with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.db").connect() as connection:
-                df_old_records=pd.read_sql(f"""SELECT * FROM processed_{self.tbl_name}""",
-                                    con=connection)
-                old_records=df_old_records['url'].unique().tolist()
+                table_exists = connection.execute(
+                    text(f"SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"),
+                {"table_name": f"processed_{self.tbl_name}"}).fetchone()
 
                 df_new_records = self.df
-                df_new_records = df_new_records.loc[~df_new_records['url'].isin(old_records),:]
+                if table_exists:
+                    df_old_records=pd.read_sql(f"""SELECT * FROM processed_{self.tbl_name}""",
+                                        con=connection)
+                    old_records=df_old_records['url'].unique().tolist()
+                    df_new_records = df_new_records.loc[~df_new_records['url'].isin(old_records),:]
 
-                df_updated_records=pd.concat([df_old_records, df_new_records]).reset_index(drop=True)
+
+                    df_updated_records=pd.concat([df_old_records, df_new_records]).reset_index(drop=True)
+                else:
+                    df_updated_records = df_new_records
+
                 df_updated_records = df_updated_records.drop_duplicates(subset=[x for x in df_updated_records.columns if x!="date_scraped"])
 
                 self.df=df_updated_records
@@ -80,10 +88,79 @@ class ScrData:
            ]
        return self
 
-    def parse_date_columns(self, list_date_cols:list, date_format='%d.%m.%Y'):
-        """Converts columns of strings to dates"""
+    def parse_date_columns(self, list_date_cols:list, list_date_formats=['%d.%m.%Y']):
+
+        # Define a dictionary that maps dates to formats
+        if len(list_date_cols) == len(list_date_formats):
+            dict_dates_n_fornats = dict(zip(list_date_cols,list_date_formats))
+
+        elif len(list_date_cols)>1 and len(list_date_formats)==1: # Case when multiple columns have same format
+            print("Lengths don't match. Infering: apply same format to all columns...")
+            list_date_formats = list_date_formats*len(list_date_cols)
+            dict_dates_n_fornats = dict(zip(list_date_cols, list_date_formats))
+
+        else:
+            raise ValueError(f"Lenghts of arguments dont match: "
+                             f"len(list_date_cols)={len(list_date_cols)},"
+                             f"len(list_date_formats)={len(list_date_formats)}")
+
+        # Converts columns of strings into dates
         for date_col in list_date_cols:
-            self.df.loc[:,date_col]=pd.to_datetime(self.df[date_col], format = date_format).dt.date
+            try:
+                # apply the format
+                self.df[date_col] = pd.to_datetime(self.df[date_col], format = dict_dates_n_fornats[date_col], errors='coerce')
+                self.df[date_col] = self.df[date_col].apply(lambda x: x.date() if pd.notnull(x) else None)
+
+            except Exception:
+                error=traceback.format_exc()
+                print(f"ERROR AT TABLE: {self.tbl_name}")
+                print(error)
+                print(self.df[date_col].unique())
+                print("END ERROR MESSAGE\n")
+        return self
+
+    def parse_date_columns_scandinavian(self, list_date_cols:list, date_format='%d.%m.%Y'):
+
+        def date_Scand_to_End(raw_date):
+            # Define a dictionary to map Scandinavian month abbreviations to English ones
+            month_map = {
+                "jan": "Jan", "feb": "Feb", "mar": "Mar", "apr": "Apr", "mai": "May", "jun": "Jun",
+                "jul": "Jul", "aug": "Aug", "sep": "Sep", "okt": "Oct", "nov": "Nov", "des": "Dec"
+            }
+            # Formats scandinavian date abbreviations into english
+            try:
+                scandinavian_month=raw_date.split()[1]
+                english_month=month_map[scandinavian_month]
+
+                date=raw_date.replace(scandinavian_month, english_month)
+
+                return date
+            except KeyError:
+                return raw_date
+
+        # Converts columns of strings into dates
+        for date_col in list_date_cols:
+            try:
+                # If date format has letters - capitalise first letter of word in the date
+                date_vals=self.df[date_col].unique().tolist()
+                date_has_letters = any([re.search('[a-zA-Z]', x) for x in date_vals])
+
+                if date_has_letters:
+
+                    self.df.loc[:,date_col]=self.df[date_col].map(lambda x: date_Scand_to_End(x))
+
+                    # self.df.loc[:, date_col] = self.df[date_col].map(lambda x: x.title())
+                    date_vals_post = self.df[date_col].unique().tolist()
+
+                # apply the format
+                self.df.loc[:,date_col]=pd.to_datetime(self.df[date_col], format = date_format).dt.date
+            except Exception:
+                error=traceback.format_exc()
+                print(f"ERROR AT TABLE: {self.tbl_name}")
+                print(error)
+                print(date_vals)
+                print(date_vals_post)
+                print("END ERROR MESSAGE\n")
             return self
 
     def filter_CH_unil_PhD(self,):
@@ -121,7 +198,7 @@ class ScrData:
         """
         def get_label_tbl_of_old_records():
 
-            cnx = sqlite3.connect('phd_jobs_in_schengen.db')
+            cnx = sqlite3.connect('../../data/phd_jobs_in_schengen.db')
             df_table_labels_old = pd.read_sql_query(f"""SELECT * FROM tbl_labels WHERE table_name = 'processed_{self.tbl_name}'""", cnx)
 
             # DEBUGING
@@ -168,7 +245,7 @@ class ScrData:
 
         if 'tbl_labels' not in get_list_of_tbls_in_db():
             print("Table 'tbl_labels' is not created. Creating...")
-            conn = sqlite3.connect("phd_jobs_in_schengen.db")
+            conn = sqlite3.connect("../../data/phd_jobs_in_schengen.db")
             cursor = conn.cursor()
             cursor.execute(f"CREATE TABLE tbl_labels (table_name TEXT,url TEXT,label TEXT);")
             conn.commit()

@@ -1,8 +1,9 @@
 import datetime
-
-from bs4 import BeautifulSoup
-import utils.scraping_utils as su
 import os
+
+import utils.scraping_utils as su
+from bs4 import BeautifulSoup
+
 page_content = su.get_page_through_selenium("https://www.ntnu.edu/vacancies", ad_element="card-deck")
 
 # Parse the page content with BeautifulSoup
@@ -32,8 +33,17 @@ def job_to_structure(job):
 
 
 jobs_structured=[job_to_structure(x) for x in jobs]
-
-
+if not jobs_structured:
+    jobs_structured={
+        'title': "",
+        'description': "",
+        'deadline': "",
+        'url': "",
+        'location': "",
+        'employment_type': "",
+        'date_scraped': "",
+    }
+print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
 
 tbl_name=os.path.basename(__file__).replace(".py","")
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

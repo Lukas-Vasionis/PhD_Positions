@@ -1,4 +1,4 @@
-[{
+pages_meta=[{
     "id": "ethz",
     "name": "ETH Zurich - Swiss Federal Institute of Technology",
     "job_vacancies_link": "https://jobs.ethz.ch/",
@@ -74,5 +74,34 @@
     "job_vacancies_link": "",
     "country_code": "NO",
     "country_name": "Norway"
+  },
+  {
+    "id": "tum",
+    "name": "Technical University of Munich",
+    "job_vacancies_link": "",
+    "country_code": "DE",
+    "country_name": "Germany"
+  },
+  {
+    "id": "dkfz",
+    "name": "German Cancer Research Center",
+    "job_vacancies_link": "",
+    "country_code": "DE",
+    "country_name": "Germany"
+  },
+  {
+    "id": "unilu",
+    "name": "University of Luxembourg",
+    "job_vacancies_link": "",
+    "country_code": "LX",
+    "country_name": "Luxembourg"
+
+  },
+  {
+    "id": "kavli_NTNU",
+    "name": "Kavli Institute (NTNU)",
+    "country_code": "NO",
+    "country_name": "Norway",
+    "url": "https://www.ntnu.edu/kavli/jobs"
   }
 ]

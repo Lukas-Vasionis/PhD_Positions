@@ -1,9 +1,10 @@
 import datetime
+import os
 
 import bs4
 import requests
 import utils.scraping_utils as su
-import os
+
 page = requests.get("https://www.nord.no/en/about/vacancies")
 soup=bs4.BeautifulSoup(page.content, "html.parser")
 
@@ -30,8 +31,16 @@ def job_to_structure(job):
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]
-
-
+if not jobs_structured:
+    jobs_structured = [{
+        'title': '',
+        'department': '',
+        'deadline': "",
+        'url': "",
+        'category': "",
+        'date_scraped': "",
+    }]
+print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
 
 tbl_name=os.path.basename(__file__).replace(".py","")
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

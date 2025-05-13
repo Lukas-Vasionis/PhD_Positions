@@ -1,14 +1,14 @@
 # from telnetlib import EC
 import datetime
+import os
 
 import bs4
-import requests
-from selenium.webdriver.support.wait import WebDriverWait
 import regex as re
+import requests
+import utils.scraping_utils as su
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-import utils.scraping_utils as su
-import os
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 def scrape_job_list(source_html):
@@ -81,7 +81,7 @@ class ScrUniBas:
                     # Wait until the 'pagination' element is loaded
                     wait=WebDriverWait(self.driver, 10)
                     pagination_element = wait.until(EC.presence_of_element_located((By.ID, "pagination")))
-                except:
+                except Exception:
                     self.driver.quit()
                     print(Exception)
 
@@ -114,7 +114,7 @@ class ScrUniBas:
                 try:
                     # Checking if scraper is in the last page (checks if scraper is on the last (max) page).
                     current_max_page = max(int(button.get_attribute('title').split()[-1]) for button in page_buttons)
-                    current_active_page =  list(filter(lambda x: pages[x] == 'ui primary button page active', pages))[0]
+                    current_active_page =  list(filter(lambda x: pages[x]=='ui primary button page active', pages))[0]
                     print(f"Scraping page: {current_active_page}")
 
                     # if str(current_active_page) == '2': # This one is for debugging
@@ -184,6 +184,8 @@ class ScrUniBas:
 
 scr_unibas=ScrUniBas(method="from_url").iterate_and_collect().structure_all_jobs()
 jobs_structured=scr_unibas.jobs_structured
+
+print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
 
 tbl_name=os.path.basename(__file__).replace(".py","")
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

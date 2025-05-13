@@ -1,12 +1,11 @@
 import datetime
-import time
-
+import os
 import bs4
 import utils.scraping_utils as su
-import os
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 
 def select_phd_jobs(driver_page):
     try:
@@ -72,7 +71,18 @@ def job_to_structure(job):
     }
 
 jobs_structured=[job_to_structure(x) for x in jobs]
-
+if not jobs_structured:
+    jobs_structured = [{
+        'title': "",
+        'company': "",
+        'date_posted': "",
+        'work_time_percentage': "",
+        'url': "",
+        'city': "",
+        'contract_type': "",
+        'date_scraped': ""
+    }]
+print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
 
 tbl_name=os.path.basename(__file__)
 su.save_to_db_as_tbl(scraped_data=jobs_structured, table_name=tbl_name, db_path=su.get_db_path())

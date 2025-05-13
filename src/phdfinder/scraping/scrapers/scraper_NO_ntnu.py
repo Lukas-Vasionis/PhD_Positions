@@ -1,8 +1,9 @@
 import datetime
-
-from bs4 import BeautifulSoup
-import utils.scraping_utils as su
 import os
+
+import utils.scraping_utils as su
+from bs4 import BeautifulSoup
+
 page_content = su.get_page_through_selenium("https://www.ntnu.edu/vacancies", ad_element="card-deck")
 
 # Parse the page content with BeautifulSoup

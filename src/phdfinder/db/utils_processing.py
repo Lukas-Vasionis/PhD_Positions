@@ -1,13 +1,12 @@
 import sqlite3
-import time
 import traceback
 
 import pandas as pd
-import sqlalchemy
 import polars as pl
+import regex as re
+import sqlalchemy
 from sqlalchemy import create_engine, text
 
-import regex as re
 
 def get_list_of_tbls_in_db():
     list_tbl=pl.read_database_uri(
@@ -199,7 +198,7 @@ class ScrData:
         """
         def get_label_tbl_of_old_records():
 
-            cnx = sqlite3.connect('phd_jobs_in_schengen.db')
+            cnx = sqlite3.connect('../../data/phd_jobs_in_schengen.db')
             df_table_labels_old = pd.read_sql_query(f"""SELECT * FROM tbl_labels WHERE table_name = 'processed_{self.tbl_name}'""", cnx)
 
             # DEBUGING
@@ -246,7 +245,7 @@ class ScrData:
 
         if 'tbl_labels' not in get_list_of_tbls_in_db():
             print("Table 'tbl_labels' is not created. Creating...")
-            conn = sqlite3.connect("phd_jobs_in_schengen.db")
+            conn = sqlite3.connect("../../data/phd_jobs_in_schengen.db")
             cursor = conn.cursor()
             cursor.execute(f"CREATE TABLE tbl_labels (table_name TEXT,url TEXT,label TEXT);")
             conn.commit()

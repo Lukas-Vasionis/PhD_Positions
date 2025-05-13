@@ -1,10 +1,10 @@
 import datetime
+import os
 from pprint import pprint
 
-import requests
 import pandas as pd
+import requests
 import utils.scraping_utils as su
-import os
 
 """
 Found their api. In the url one must set the offset=0 and limit=999. Hope they will never post more than 999 ads...

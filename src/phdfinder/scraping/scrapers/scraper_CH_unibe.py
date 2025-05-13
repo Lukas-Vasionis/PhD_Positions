@@ -1,12 +1,9 @@
 import datetime
-from pprint import pprint
-
-import bs4
-import pandas as pd
-import requests
-import utils.scraping_utils as su
 import os
 import traceback
+import bs4
+import requests
+import utils.scraping_utils as su
 
 
 def show_all_jobs_in_one_page(page_soup, limit_jobs_viewed, page_url):
@@ -98,14 +95,14 @@ try:
 
     if not jobs_structured:
         jobs_structured =  [{
-            'title': "",
+            'title':"",
             'institute':"",
-            'url': "",
-            'date_posted': "",
+            'url':"",
+            'date_posted':"",
             "date_scraped":"",
-            'occupation_percent': "",
-            'employment_info': "",
-            'location': "",
+            'occupation_percent':"",
+            'employment_info':"",
+            'location':"",
         }]
     print(f"\tSCRAPED JOBS: {len([x for x in jobs_structured if x['title'] != ""])}\n")
     print("Saving...")

@@ -1,14 +1,15 @@
 import datetime
+import os
+import time
 import traceback
+
+import utils.scraping_utils as su
+from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-import time
-from bs4 import BeautifulSoup
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
-import utils.scraping_utils as su
-import os
 
 class ScrUniL:
     def __init__(self, driver):
@@ -92,8 +93,8 @@ class JobLists:
         # Add to the rest of the lists
         self.list_all_jobs += job_raw_list
         return self
-    def process_raw_lists(self):
 
+    def process_raw_lists(self):
         def structure_job(job):
             """
             Structures html element into dictionary of a single job ad
@@ -118,14 +119,18 @@ class JobLists:
                 posted_date = note_section.find_all('span', class_='jobContentEM')[1].get_text(
                     strip=True) if note_section and len(note_section.find_all('span', class_='jobContentEM')) > 1 else 'N/A'
                 posted_date = posted_date.replace("Posted on ","")
+
                 type_of_position = \
-                note_section.find('span', {'aria-label': lambda x: x and 'Type of position' in x}).get('onclick').split('["')[
-                    1].split('"]')[0] if note_section and note_section.find('span', {
-                    'aria-label': lambda x: x and 'Type of position' in x}) else 'N/A'
-                area_of_activity = \
-                note_section.find('span', {'aria-label': lambda x: x and 'Area of Activity' in x}).get('onclick').split('["')[
-                    1].split('"]')[0] if note_section and note_section.find('span', {
-                    'aria-label': lambda x: x and 'Area of Activity' in x}) else 'N/A'
+                note_section.find('span',
+                                  {'aria-label': lambda x: x and 'Type of position' in x}
+                                  ).get('onclick').split('["')[1].split('"]')[0] if note_section and note_section.find(
+                    'span', {'aria-label': lambda x: x and 'Type of position' in x}) else 'N/A'
+                area_of_activity = note_section.find('span',
+                                                     {'aria-label': lambda x: x and 'Area of Activity' in x}
+                                                     ).get('onclick'
+                                                           ).split('["')[1].split('"]')[0] if note_section and note_section.find(
+                    'span', {'aria-label': lambda x: x and 'Area of Activity' in x}
+) else 'N/A'
                 rate_of_participation = \
                 note_section.find('span', {'aria-label': lambda x: x and 'Rate of Participation' in x}).get('onclick').split(
                     '["')[1].split('"]')[0] if note_section and note_section.find('span', {
@@ -167,7 +172,6 @@ Start
 
 url="https://career5.successfactors.eu/career?company=universitdP&career_ns=job_listing_summary"
 # Executes the driver of job listings page
-
 # Initiate scraper class
 scraper_unil=ScrUniL(su.get_page_through_selenium(page=url,
                                     ad_element="41:_outer",

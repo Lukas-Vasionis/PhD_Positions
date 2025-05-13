@@ -1,11 +1,11 @@
 import datetime
+import os
+import traceback
+from pprint import pprint
 
 import bs4
 import requests
-from pprint import pprint
 import utils.scraping_utils as su
-import os
-import traceback
 
 
 def get_raw_list_of_jobs(page_soup) -> list:
@@ -70,7 +70,7 @@ def structure_job_info(job_raw) -> dict:
 pages=[
     'https://www.med.uio.no/english/about/vacancies/index.html',
     "https://www.mn.uio.no/english/about/vacancies/index.html",
-       "https://www.sum.uio.no/english/about/vacancies/"
+    "https://www.sum.uio.no/english/about/vacancies/"
 ]
 
 all_structured_data=[]

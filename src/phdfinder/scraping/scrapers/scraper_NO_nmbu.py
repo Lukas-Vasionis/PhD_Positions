@@ -1,10 +1,10 @@
 import datetime
+import os
+import traceback
 from pprint import pprint
 
 import bs4
 import utils.scraping_utils as su
-import os
-import traceback
 
 
 def job_to_structure(job):

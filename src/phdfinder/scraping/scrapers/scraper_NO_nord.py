@@ -1,9 +1,10 @@
 import datetime
+import os
 
 import bs4
 import requests
 import utils.scraping_utils as su
-import os
+
 page = requests.get("https://www.nord.no/en/about/vacancies")
 soup=bs4.BeautifulSoup(page.content, "html.parser")
 

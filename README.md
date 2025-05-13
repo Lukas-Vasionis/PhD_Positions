@@ -4,29 +4,29 @@ single app interface. Here you can label the vacancies to follow which of them y
 The data is updated once a week.
 
 ## The data
-So far, the scrapers take only vacancies of PhDs in biomedical science. However, some 
-universities post everything in one list. So, some scrapers take everything and you 
-may find vacancies for Post-docs or Managers in fields like gender studies or theology.
-Maybe it's a sign from the above for a career change? Who knows.  ¯\_(ツ)_/¯
+Currently, the scrapers are designed to collect PhD vacancies specifically in biomedical 
+sciences. However, since some universities publish all positions—ranging from Postdocs to 
+administrative roles—in a single listing, some scrapers may capture unrelated vacancies in
+fields like economics, gender studies, or theology.
+
+In the future, I plan to explore filtering these using a language model. Until then, consider 
+it a devine nudge towards a new career path and call it a feature. ¯\_(ツ)_/¯
 
 ## Why the struggle ?
 
-So I am looking for PhD in Norway and Switzerland and I have to constantly monitor multiple university pages for open positions which is painful.
+So I am looking for a PhD in Europe and I have to constantly monitor multiple university pages for open positions which is painful.
 So, being a programmer I figured I could automate this monitoring by writing a few scrapers 
-and displaying gathered data in a single interface of a streamlit app. Now with few clicks I have the newest data in one place. 
-Moreover - I can mark which positions to ignore, and which are interesting. 
+and displaying gathered data in a single interface of a streamlit app. Now with a few clicks I have the newest data in one place. 
+Moreover, I can mark which positions to ignore, and which are interesting. 
 
 
 The app is engineered with intend to upscale it. Over the time I will add scrapers for more universities. 
 
 !['App iamge'](docs/img/app_demo.png)
 # Usage
-You may go to the deployed app: https://phd-positions.streamlit.app/
-
-OR
 
 Run these commands locally be executing these commands in the console:
-- Move to the root dir of this project
+- Clone the repo and move to the root dir of this project
 - Install the requirements
   - For devs:
     ```
@@ -40,7 +40,7 @@ Run these commands locally be executing these commands in the console:
 
 - Run `./scraping/execute_scrapers.py` to gather the data.
 - Run `./db/process_db_tables.py` to process the data (parse dates, sort, join, etc.).
-- Run `streamlit run ./steamlit.py` to execute the app locally in your browser
+- Run `streamlit run ./src/phdfinder/streamlit_app.py` to execute the app locally in your browser
 
 # To do
 ## Scraping
@@ -67,3 +67,4 @@ Run these commands locally be executing these commands in the console:
 - University Hospitals
 - Netherland Universities
 - Swedish Universities
+- Finish Universities

@@ -67,4 +67,4 @@ Run these commands locally be executing these commands in the console:
 - University Hospitals
 - Netherland Universities
 - Swedish Universities
-- Finish Universities
+- Finnish Universities

@@ -97,7 +97,7 @@ def run():
 
         print("Saving...")
         tbl_name=os.path.basename(__file__).replace(".py","")
-        su.save_to_db_as_tbl(scraped_data=all_structured_data, table_name=tbl_name, db_path=su.get_db_path())
+        su.save_to_db_as_tbl(scraped_data=all_structured_data, table_name=f"raw_{tbl_name}", db_path=su.get_db_path())
 
     except Exception as e:
         print(e)

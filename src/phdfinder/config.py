@@ -1,3 +1,8 @@
+from pathlib import Path
+
+# Get absolute path to the DB inside the data/ folder
+DB_PATH = str(Path(__file__).resolve().parents[2] / "data" / "phd_jobs_in_schengen.db")
+
 pages_meta=[{
     "id": "ethz",
     "name": "ETH Zurich - Swiss Federal Institute of Technology",

@@ -100,3 +100,4 @@ flake8 = "^7.2.0"
 [tool.poetry.scripts]
 scrape = "scripts.scrape:main"
 process = "scripts.process:main"
+app = "scripts.app:main"

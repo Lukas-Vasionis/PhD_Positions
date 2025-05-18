@@ -63,7 +63,7 @@ label_options = ["None", "Discard", "Interesting", "Applied", 'Rejected']
 
 
 # Function to save updated labels to the database
-def save_labels(_conn: sqlite3.Connection,labels_df: pd.DataFrame) -> None:
+def save_labels(_conn: sqlite3.Connection, labels_df: pd.DataFrame) -> None:
     _cursor = _conn.cursor()
     update_query = """UPDATE tbl_labels SET label = ? WHERE url = ?"""
     rows_to_update = labels_df[['label', 'url']].to_records(index=False).tolist()

@@ -6,7 +6,8 @@ from viewer import get_columns as _get_columns
 from viewer import get_tables as _get_tables
 from viewer import save_labels
 
-from config import pages_meta
+from phdfinder.config import pages_meta,DB_PATH
+
 
 
 def get_db_connection(db_path: Path) -> sqlite3.Connection:
@@ -157,7 +158,9 @@ def render_ui(metadata: list, conn: sqlite3.Connection):
 
             # Save labels when the user clicks the button
             if st.button('Save Labels', key=f"save_{table}"):
-                save_labels(conn, table, edited_data[['url', 'label']].dropna())
+                save_labels(conn,
+                            # table,
+                            edited_data[['url', 'label']].dropna())
                 st.cache_data.clear()
                 st.rerun()
 
@@ -184,8 +187,9 @@ def render_ui(metadata: list, conn: sqlite3.Connection):
 
 
 def main():
-    BASE = Path(__file__).parent
-    db_path = BASE.parent / "data" / "phd_jobs_in_schengen.processing"
+    # BASE = Path(__file__).parent
+    # db_path = BASE.parent.parent / "data" / "phd_jobs_in_schengen.db"
+    db_path = Path(DB_PATH)
 
     metadata = pages_meta
     conn = get_db_connection(db_path)

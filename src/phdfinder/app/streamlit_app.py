@@ -1,12 +1,13 @@
 import sqlite3
 from pathlib import Path
 import streamlit as st
-from db.viewer import download_filtered_tables, fetch_data
-from db.viewer import get_columns as _get_columns
-from db.viewer import get_tables as _get_tables
-from db.viewer import save_labels
+from viewer import download_filtered_tables, fetch_data
+from viewer import get_columns as _get_columns
+from viewer import get_tables as _get_tables
+from viewer import save_labels
 
-from config import pages_meta
+from phdfinder.config import pages_meta,DB_PATH
+
 
 
 def get_db_connection(db_path: Path) -> sqlite3.Connection:
@@ -58,7 +59,7 @@ def render_ui(metadata: list, conn: sqlite3.Connection):
         The app is designed to ease you PhD search by gathering data about open European PhD positions into one place.
         All data is scraped directly from the primary source - pages of the universities. The data is oriented to PhD job
         positions in biomedical field. However, some universities post various vacancies in the single list. Therefore,
-        don't be surprised to find positions in linguistics, theology or arts. This will be fixed in further updates of the scrapers.
+        don't be surprised to find positions in linguistics, theology or arts. This will be fixed in further updates of the universities.
        
         ---
         """
@@ -157,7 +158,9 @@ def render_ui(metadata: list, conn: sqlite3.Connection):
 
             # Save labels when the user clicks the button
             if st.button('Save Labels', key=f"save_{table}"):
-                save_labels(conn, table, edited_data[['url', 'label']].dropna())
+                save_labels(conn,
+                            # table,
+                            edited_data[['url', 'label']].dropna())
                 st.cache_data.clear()
                 st.rerun()
 
@@ -184,8 +187,9 @@ def render_ui(metadata: list, conn: sqlite3.Connection):
 
 
 def main():
-    BASE = Path(__file__).parent
-    db_path = BASE.parent / "data" / "phd_jobs_in_schengen.db"
+    # BASE = Path(__file__).parent
+    # db_path = BASE.parent.parent / "data" / "phd_jobs_in_schengen.db"
+    db_path = Path(DB_PATH)
 
     metadata = pages_meta
     conn = get_db_connection(db_path)

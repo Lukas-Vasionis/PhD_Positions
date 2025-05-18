@@ -1,13 +1,12 @@
 import inspect
 import os
 import time
-
 import polars as pl
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-
+from phdfinder.config import DB_PATH
 
 def get_page_through_selenium(page, ad_element, return_driver=False):
     """
@@ -50,14 +49,10 @@ def get_page_through_selenium(page, ad_element, return_driver=False):
         page_content_local = driver.page_source
         return page_content_local
 
-def get_db_path(relative_path="../../db/phd_jobs_in_schengen.db"):
-    # Get the file path of the calling script
-    calling_script = inspect.stack()[1].filename  # Get the filename of the caller
-    # Get the directory of the calling script
-    script_dir = os.path.dirname(os.path.abspath(calling_script))
-    # Construct the absolute path to the database
-    absolute_path = os.path.join(script_dir, relative_path)
-    return absolute_path
+
+
+def get_db_path():
+    return DB_PATH
 
 def save_to_db_as_tbl(table_name, scraped_data, db_path):
 

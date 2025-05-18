@@ -4,6 +4,10 @@ version = "0.1.0"
 description = "CLI + Streamlit app to scrape and visualize PhD jobs"
 authors = [
     {name = "Lukas Vasionis"}
+
+]
+packages = [
+    { include = "phdfinder", from = "src" }
 ]
 readme = "README.md"
 requires-python = "^3.10"
@@ -93,3 +97,7 @@ build-backend = "poetry.core.masonry.api"
 pytest = "^8.3.5"
 flake8 = "^7.2.0"
 
+[tool.poetry.scripts]
+scrape = "scripts.scrape:main"
+process = "scripts.process:main"
+app = "scripts.app:main"

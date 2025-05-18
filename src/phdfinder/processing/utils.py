@@ -12,7 +12,7 @@ def get_list_of_tbls_in_db():
     list_tbl=pl.read_database_uri(
         query="SELECT name FROM sqlite_master WHERE type='table';",
         # query="SELECT * FROM scraper_NO_uib",
-        uri="sqlite://phd_jobs_in_schengen.db"
+        uri="sqlite://phd_jobs_in_schengen.processing"
     ).select("name").to_series().to_list()
     return list_tbl
 
@@ -30,7 +30,7 @@ class ScrData:
         :return: pd.DataFrame
         """
         print(f"Loading table: {self.tbl_name}")
-        with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.db").connect() as connection:
+        with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.processing").connect() as connection:
             self.df=pd.read_sql(f"""SELECT * FROM {self.tbl_name}""",
                                 con=connection)
         return self
@@ -46,7 +46,7 @@ class ScrData:
             # Find records (by url) that were already scraped.
             # Remove them from new records
             # Add new records to the old ones
-            with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.db").connect() as connection:
+            with sqlalchemy.create_engine("sqlite:///phd_jobs_in_schengen.processing").connect() as connection:
                 table_exists = connection.execute(
                     text(f"SELECT name FROM sqlite_master WHERE type='table' AND name=:table_name"),
                 {"table_name": f"processed_{self.tbl_name}"}).fetchone()
@@ -192,13 +192,13 @@ class ScrData:
     def create_or_update_tbl_labels(self):
         """
         Labels table holds record labels that were assigned in the app ('applied', 'interesting', 'DNA not interesting', 'DNA requirements')
-        This table holds records of all scrapers
+        This table holds records of all universities
         If didn't exist: Creates labels table
         If exists: Appends scraped new records to it, removes duplicates
         """
         def get_label_tbl_of_old_records():
 
-            cnx = sqlite3.connect('../../data/phd_jobs_in_schengen.db')
+            cnx = sqlite3.connect('../../../data/phd_jobs_in_schengen.db')
             df_table_labels_old = pd.read_sql_query(f"""SELECT * FROM tbl_labels WHERE table_name = 'processed_{self.tbl_name}'""", cnx)
 
             # DEBUGING
@@ -245,7 +245,7 @@ class ScrData:
 
         if 'tbl_labels' not in get_list_of_tbls_in_db():
             print("Table 'tbl_labels' is not created. Creating...")
-            conn = sqlite3.connect("../../data/phd_jobs_in_schengen.db")
+            conn = sqlite3.connect("../../../data/phd_jobs_in_schengen.db")
             cursor = conn.cursor()
             cursor.execute(f"CREATE TABLE tbl_labels (table_name TEXT,url TEXT,label TEXT);")
             conn.commit()
@@ -256,10 +256,10 @@ class ScrData:
         df_labels_new = get_label_tbl_of_new_records()
         df_labels = update_tbl_labels_records(df_labels_old, df_labels_new)
         #
-        # df_labels = pl.from_pandas(df_labels)  # Transforming into polars df only because uploading it into sql db is easier than pandas.
+        # df_labels = pl.from_pandas(df_labels)  # Transforming into polars df only because uploading it into sql processing is easier than pandas.
         # df_labels.write_database(
         #     "tbl_labels",
-        #     connection=f"sqlite:///phd_jobs_in_schengen.db",
+        #     connection=f"sqlite:///phd_jobs_in_schengen.processing",
         #     if_table_exists='replace'
         # )
 
@@ -267,7 +267,7 @@ class ScrData:
         return self
 
     def save_to_db(self, df_to_upload=None, table_name=None, if_table_exists="replace"):
-        # By default, this function is designed to upload processed tables. However, its is possible to upload any table to db if default arguments are changed
+        # By default, this function is designed to upload processed tables. However, its is possible to upload any table to processing if default arguments are changed
 
         if table_name is None:
             table_name=f"processed_{self.tbl_name}"
@@ -278,15 +278,15 @@ class ScrData:
         # df_to_upload = self.df_labels
 
         try:
-            engine = create_engine('sqlite:///phd_jobs_in_schengen.db')
+            engine = create_engine('sqlite:///phd_jobs_in_schengen.processing')
 
 
             df_to_upload.to_sql(table_name, engine, if_exists='replace', index=False)
 
-            # df_to_upload = pl.from_pandas(df_to_upload) # Transforming into polars df only because uploading it into sql db is easier than pandas.
+            # df_to_upload = pl.from_pandas(df_to_upload) # Transforming into polars df only because uploading it into sql processing is easier than pandas.
             # df_to_upload.write_database(
             #     table_name,
-            #     connection=f"sqlite:///phd_jobs_in_schengen.db",
+            #     connection=f"sqlite:///phd_jobs_in_schengen.processing",
             #     if_table_exists=if_table_exists
             # )
         except Exception as e:

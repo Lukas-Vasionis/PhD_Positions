@@ -25,22 +25,24 @@ The app is engineered with intend to upscale it. Over the time I will add scrape
 !['App iamge'](docs/img/app_demo.png)
 # Usage
 
-Run these commands locally be executing these commands in the console:
+Run these commands locally be executing these commands in the **terminal**:
 - Clone the repo and move to the root dir of this project
+  ```
+  git clone https://github.com/Lukas-Vasionis/PhD_Positions.git
+  ```
+- Get to the root of the project
+  ```
+  cd PhD_Positions
+  ```
 - Install the requirements
-  - For devs:
-    ```
-    pip install poetry              # one-time
-    poetry install                  # sets up both prod & dev deps
-    ```
-  - For end users:
-    ```
-    poetry install --no-dev
-    ```
-
-- Run `./scraping/execute_scrapers.py` to gather the data.
-- Run `./db/process_db_tables.py` to process the data (parse dates, sort, join, etc.).
-- Run `streamlit run ./src/phdfinder/streamlit_app.py` to execute the app locally in your browser
+  ```
+  pip install poetry              # Installs Poetry if you havent
+  poetry install                  # Sets up poetry environment with the project requirements
+  ```
+  
+- Run `poetry run scrape` to gather the data.
+- Run `poetry run process` to process the data (parse dates, sort, join, etc.).
+- Run `poetry run app` to execute the app locally in your browser
 
 # To do
 ## Scraping
